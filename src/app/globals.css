@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-outfit: 'Outfit', sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-outfit);
+  background: #f1f3f6;
+  min-height: 100vh;
+}
+
+/* Flipkart-like clean background for sections */
+.bg-flipkart {
+  background: #f1f3f6;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3b82f6, #0ea5e9);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #2563eb, #0284c7);
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Card styles */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -12px rgba(59, 130, 246, 0.2);
+}
+
+/* Product image zoom */
+.product-image {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.08);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 50%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.4);
+}
+
+/* WhatsApp button pulse */
+.whatsapp-pulse {
+  animation: whatsappPulse 2s infinite;
+}
+
+@keyframes whatsappPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+  }
+}
+
+/* Shimmer effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Hero carousel indicators */
+.carousel-dot {
+  transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+  width: 32px;
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9);
+}
+
+/* Category card gradient overlay */
+.category-overlay {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+/* Trust badge animation */
+.trust-badge {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.trust-badge:nth-child(1) { animation-delay: 0.1s; }
+.trust-badge:nth-child(2) { animation-delay: 0.2s; }
+.trust-badge:nth-child(3) { animation-delay: 0.3s; }
+.trust-badge:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark mode styles */
+.dark body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+.dark .glass {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.dark .glass-strong {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+/* Form input styles */
+.input-field {
+  transition: all 0.3s ease;
+  border: 2px solid #e2e8f0;
+}
+
+.input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Badge animation */
+.badge-bounce {
+  animation: badgeBounce 0.5s ease;
+}
+
+@keyframes badgeBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+/* Slide-in cart */
+.cart-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Price styling */
+.price-current {
+  color: #059669;
+  font-weight: 700;
+}
+
+.price-original {
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+/* Mobile touch optimization */
+@media (hover: none) {
+  .card-hover:hover {
+    transform: none;
+  }
+  
+  .product-card:hover .product-image {
+    transform: none;
+  }
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #1e3a8a;
+}
+
