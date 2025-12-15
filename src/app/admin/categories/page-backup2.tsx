@@ -1,0 +1,363 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/Button'
+import { Plus, Edit2, Trash2, Image as ImageIcon } from 'lucide-react'
+
+interface Category {
+  id: string
+  name: string
+  image_url: string | null
+  is_active: boolean
+  show_in_hero: boolean
+  display_order: number
+  created_at: string
+}
+
+export default function CategoriesPage() {
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [formData, setFormData] = useState({ name: '', image_url: '', show_in_hero: false })
+  const [uploading, setUploading] = useState(false)
+  const supabase = createClient()
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('display_order', { ascending: true })
+
+      if (error) throw error
+      setCategories(data || [])
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('category-images')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage
+        .from('category-images')
+        .getPublicUrl(filePath)
+
+      setFormData({ ...formData, image_url: data.publicUrl })
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Failed to upload image')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    if (!formData.name.trim()) {
+      alert('Please enter a category name')
+      return
+    }
+
+    try {
+      if (editingCategory) {
+        // Update existing category
+        const { error } = await supabase
+          .from('categories')
+          .update({
+            name: formData.name,
+            image_url: formData.image_url || null,
+            show_in_hero: formData.show_in_hero,
+          })
+          .eq('id', editingCategory.id)
+
+        if (error) throw error
+      } else {
+        // Create new category
+        const { error } = await supabase
+          .from('categories')
+          .insert({
+            name: formData.name,
+            image_url: formData.image_url || null,
+            is_active: true,
+            show_in_hero: formData.show_in_hero,
+            display_order: categories.length + 1,
+          })
+
+        if (error) throw error
+      }
+
+      setShowModal(false)
+      setFormData({ name: '', image_url: '', show_in_hero: false })
+      setEditingCategory(null)
+      fetchCategories()
+    } catch (error) {
+      console.error('Error saving category:', error)
+      alert('Failed to save category')
+    }
+  }
+
+  const handleEdit = (category: Category) => {
+    setEditingCategory(category)
+    setFormData({
+      name: category.name,
+      image_url: category.image_url || '',
+      show_in_hero: category.show_in_hero || false,
+    })
+    setShowModal(true)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this category?')) return
+
+    try {
+      const { error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      fetchCategories()
+    } catch (error) {
+      console.error('Error deleting category:', error)
+      alert('Failed to delete category')
+    }
+  }
+
+  const toggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('categories')
+        .update({ is_active: !currentStatus })
+        .eq('id', id)
+
+      if (error) throw error
+      fetchCategories()
+    } catch (error) {
+      console.error('Error toggling category:', error)
+    }
+  }
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <p className="text-sm text-gray-600">
+            {loading ? 'Loading...' : `${categories.length} categories`}
+          </p>
+        </div>
+        <Button
+          onClick={() => {
+            setEditingCategory(null), show_in_hero: false
+            setFormData({ name: '', image_url: '' })
+            setShowModal(true)
+          }}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Category
+        </Button>
+      </div>
+
+      {/* Categories Grid */}
+      {loading ? (
+        <div className="text-center py-12 text-gray-500">Loading...</div>
+      ) : categories.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+          <p className="text-gray-500 mb-4">No categories yet</p>
+          <Button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Add Your First Category
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start gap-4">
+                {/* Image */}
+                <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {category.image_url ? (
+                    <img
+                      src={category.image_url}
+                      alt={category.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon className="w-8 h-8 text-gray-400" />
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 mb-1 truncate">
+                    {category.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <button
+                      onClick={() => toggleActive(category.id, category.is_active)}
+                      className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        category.is_active
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {category.is_active ? 'Active' : 'Inactive'}
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(category)}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(category.id)}
+                      className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {showModal && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-40"
+            onClick={() => setShowModal(false)}
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">
+                {editingCategory ? 'Edit Category' : 'Add Category'}
+              </h2>
+
+              <div className="space-y-4">
+                {/* Category Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    placeholder="e.g., Fish Tanks"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category Image
+                  </label>
+                  {formData.image_url ? (
+                    <div className="relative">
+                      <img
+                        src={formData.image_url}
+                        alt="Preview"
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => setFormData({ ...formData, image_url: '' })}
+                        className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="block w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <ImageIcon className="w-8 h-8 mb-2" />
+                        <span className="text-sm">
+                          {uploading ? 'Uploading...' : 'Click to upload'}
+                        </span>
+                      </div>
+                    </label>
+                  )}
+                </div>
+
+                {/* Show in Hero Section Toggle */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="show_in_hero"
+                    checked={formData.show_in_hero}
+                    onChange={(e) => setFormData({ ...formData, show_in_hero: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <label htmlFor="show_in_hero" className="ml-2 text-sm font-medium text-gray-700">
+                    Show in Hero Section
+                  </label>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-6">
+                <Button
+                  onClick={() => setShowModal(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={uploading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {uploading ? 'Uploading...' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

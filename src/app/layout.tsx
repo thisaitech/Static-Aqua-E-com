@@ -1,11 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { AuthModal } from '@/components/layout/AuthModal';
-import { CartDrawer } from '@/components/layout/CartDrawer';
-import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
+import { AuthProvider } from '@/context/AuthContext';
+import { ConditionalLayout } from '@/components/layout/ConditionalLayout';
 
 export const metadata: Metadata = {
   title: 'Rainbow Aqua - Premium Aquarium & Exotic Birds Store',
@@ -55,14 +52,11 @@ export default function RootLayout({
         <meta name="theme-color" content="#3b82f6" />
       </head>
       <body className="antialiased">
-        <StoreProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-          <AuthModal />
-          <CartDrawer />
-          <WhatsAppButton />
-        </StoreProvider>
+        <AuthProvider>
+          <StoreProvider>
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </StoreProvider>
+        </AuthProvider>
       </body>
     </html>
   );

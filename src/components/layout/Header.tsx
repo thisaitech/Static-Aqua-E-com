@@ -19,16 +19,28 @@ import {
   Truck
 } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
+import { useAuth } from '@/context/AuthContext';
 import { categories } from '@/data/products';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
+
+interface DbCategory {
+  id: string;
+  name: string;
+  image_url: string | null;
+  is_active: boolean;
+  display_order: number;
+}
 
 export function Header() {
-  const { cartCount, toggleCart, toggleAuthModal, user, wishlist } = useStore();
+  const { cartCount, toggleCart, toggleAuthModal, wishlist } = useStore();
+  const { user, userRole } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [dbCategories, setDbCategories] = useState<DbCategory[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,14 +58,60 @@ export function Header() {
     }
   }, [isDark]);
 
-  const mainCategories = [
-    { href: '/category/fish-tanks', label: 'Fish Tanks', icon: '🐠' },
-    { href: '/category/live-plants', label: 'Live Plants', icon: '🌿' },
-    { href: '/category/fancy-birds', label: 'Fancy Birds', icon: '🦜', highlight: true },
-    { href: '/category/co2-lighting', label: 'Equipment', icon: '⚡' },
-    { href: '/category/live-fish', label: 'Live Fish', icon: '🐟' },
-    { href: '/category/bird-supplies', label: 'Bird Supplies', icon: '🏠' },
-  ];
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, image_url, is_active, display_order')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setDbCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const getCategoryIcon = (name: string) => {
+    const iconMap: { [key: string]: string } = {
+      'fish tanks': '🐠',
+      'live plants': '🌿',
+      'fancy birds': '🦜',
+      'equipment': '⚡',
+      'live fish': '🐟',
+      'bird supplies': '🏠',
+      'foods & medicines': '🍽️',
+      'tank accessories & spares': '🔧',
+      'accessories': '🎨',
+      'co2 & lighting': '💡',
+    };
+    return iconMap[name.toLowerCase()] || '📦';
+  };
+
+  const mainCategories = dbCategories.length > 0 
+    ? dbCategories.map(cat => {
+        const slug = cat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        return {
+          href: `/category/${slug}`,
+          label: cat.name,
+          icon: getCategoryIcon(cat.name),
+          highlight: cat.name.toLowerCase().includes('fancy birds')
+        };
+      })
+    : [
+        { href: '/category/fish-tanks', label: 'Fish Tanks', icon: '🐠' },
+        { href: '/category/live-plants', label: 'Live Plants', icon: '🌿' },
+        { href: '/category/fancy-birds', label: 'Fancy Birds', icon: '🦜', highlight: true },
+        { href: '/category/co2-lighting', label: 'Equipment', icon: '⚡' },
+        { href: '/category/live-fish', label: 'Live Fish', icon: '🐟' },
+        { href: '/category/bird-supplies', label: 'Bird Supplies', icon: '🏠' },
+      ];
 
   return (
     <>
@@ -142,9 +200,14 @@ export function Header() {
                 className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <User className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                <span className="text-sm font-medium text-slate-700 dark:text-white">
-                  {user ? user.name.split(' ')[0] : 'Login'}
-                </span>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-slate-700 dark:text-white">
+                    {user ? user.email?.split('@')[0] : 'Login'}
+                  </span>
+                  {user && userRole === 'admin' && (
+                    <span className="text-xs text-primary-600 dark:text-primary-400">Admin</span>
+                  )}
+                </div>
                 <ChevronDown className="w-4 h-4 text-slate-400" />
               </button>
 
@@ -220,7 +283,7 @@ export function Header() {
         <div className="hidden lg:block border-t border-slate-100 dark:border-slate-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="flex items-center gap-1 py-2 overflow-x-auto">
-              {mainCategories.map((cat) => (
+              {mainCategories.map((cat, index) => (
                 <Link
                   key={cat.href}
                   href={cat.href}
@@ -233,16 +296,6 @@ export function Header() {
                 >
                   <span>{cat.icon}</span>
                   {cat.label}
-                </Link>
-              ))}
-              <div className="h-6 w-px bg-slate-200 mx-2" />
-              {categories.slice(6, 9).map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/category/${cat.slug}`}
-                  className="px-3 py-2 text-sm text-slate-500 hover:text-primary-600 whitespace-nowrap"
-                >
-                  {cat.name}
                 </Link>
               ))}
             </nav>
@@ -278,11 +331,11 @@ export function Header() {
                 </button>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white text-xl font-bold">
-                    {user ? user.name.charAt(0).toUpperCase() : '👤'}
+                    {user ? user.email?.charAt(0).toUpperCase() : '👤'}
                   </div>
                   <div>
                     <p className="text-white font-semibold">
-                      {user ? `Hello, ${user.name.split(' ')[0]}` : 'Welcome'}
+                      {user ? `Hello, ${user.email?.split('@')[0]}` : 'Welcome'}
                     </p>
                     <button 
                       onClick={() => {

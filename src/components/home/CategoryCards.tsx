@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { categories } from '@/data/products';
 import { cn } from '@/lib/utils';
 import { 
   Fish, 
@@ -15,6 +14,8 @@ import {
   Settings,
   Waves
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 // Category icons mapping
 const categoryIcons: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
@@ -78,7 +79,56 @@ const categoryImageUrls: Record<string, string> = {
   'accessories': 'https://images.unsplash.com/photo-1571680322279-a226e6a4cc2a?w=200&h=200&fit=crop',
 };
 
+interface Category {
+  id: number;
+  name: string;
+  image_url: string;
+  display_order: number;
+}
+
 export function CategoryCards() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="py-8 bg-white dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-4 sm:gap-6">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-200 dark:bg-slate-700 mb-2" />
+                <div className="w-12 h-3 bg-slate-200 dark:bg-slate-700 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-8 bg-white dark:bg-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,8 +152,10 @@ export function CategoryCards() {
         {/* Categories Grid - Circular Icons */}
         <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-4 sm:gap-6">
           {categories.map((category, index) => {
-            const iconConfig = categoryIcons[category.id];
-            const imageUrl = categoryImageUrls[category.id];
+            const slug = category.name.toLowerCase().replace(/\s+/g, '-').replace(/[&]/g, '');
+            const iconKey = slug;
+            const iconConfig = categoryIcons[iconKey];
+            const fallbackImage = categoryImageUrls[iconKey];
             
             return (
               <motion.div
@@ -114,41 +166,33 @@ export function CategoryCards() {
                 transition={{ delay: index * 0.05 }}
               >
                 <Link 
-                  href={`/category/${category.slug}`}
+                  href={`/category/${slug}`}
                   className="group flex flex-col items-center text-center"
                 >
                   {/* Circular Image/Icon Container */}
-                  <div className={cn(
-                    'relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-2 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg',
-                    category.id === 'fancy-birds' 
-                      ? 'ring-2 ring-primary-500 ring-offset-2' 
-                      : ''
-                  )}>
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-2 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
                     {/* Background Image */}
                     <img
-                      src={imageUrl || category.image}
+                      src={category.image_url || fallbackImage}
                       alt={category.name}
                       className="w-full h-full object-cover"
                     />
                     {/* Overlay with Icon */}
-                    <div className={cn(
-                      'absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity',
-                      iconConfig?.bg || 'bg-slate-100',
-                      'bg-opacity-90'
-                    )}>
-                      <span className={iconConfig?.color || 'text-slate-600'}>
-                        {iconConfig?.icon}
-                      </span>
-                    </div>
+                    {iconConfig && (
+                      <div className={cn(
+                        'absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity',
+                        iconConfig.bg,
+                        'bg-opacity-90'
+                      )}>
+                        <span className={iconConfig.color}>
+                          {iconConfig.icon}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Label */}
-                  <span className={cn(
-                    'text-xs sm:text-sm font-medium line-clamp-2 transition-colors',
-                    category.id === 'fancy-birds'
-                      ? 'text-primary-600'
-                      : 'text-slate-600 dark:text-slate-300 group-hover:text-primary-600'
-                  )}>
+                  <span className="text-xs sm:text-sm font-medium line-clamp-2 transition-colors text-slate-600 dark:text-slate-300 group-hover:text-primary-600">
                     {category.name.split('&')[0].trim()}
                   </span>
                 </Link>
