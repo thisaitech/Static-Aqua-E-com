@@ -1,6 +1,6 @@
 'use client';
 
-import { HeroCarousel } from '@/components/home/HeroCarousel';
+import { HeroCarousel } from '@/components/home/HeroCarousel2';
 import { WishlistPreview } from '@/components/home/WishlistPreview';
 import { CategoryCards, DealsBanner } from '@/components/home/CategoryCards';
 import { FeaturedProducts, NewArrivals, BestSellers } from '@/components/home/ProductSections';

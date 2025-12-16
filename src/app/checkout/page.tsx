@@ -17,7 +17,15 @@ import { useStore } from '@/context/StoreContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { formatPrice } from '@/lib/utils';
+import { calculateShipping } from '@/lib/shipping';
 import { tamilNaduDistricts, borderingStates } from '@/data/tamilnadu-districts';
+
+// Declare Razorpay on window object
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -34,14 +42,70 @@ export default function CheckoutPage() {
     pincode: '',
   });
 
-  const shippingCost = cartTotal >= 2000 ? 0 : 150;
+  // Calculate shipping based on order value
+  const shippingCost = calculateShipping(cartTotal);
   const total = cartTotal + shippingCost;
 
   const handlePlaceOrder = async () => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    clearCart();
-    router.push('/order-success');
+    if (!user) {
+      alert('Please login to place an order');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Prepare order data
+      const orderData = {
+        customer_name: shippingData.name,
+        customer_email: shippingData.email,
+        customer_phone: shippingData.phone,
+        shipping_address: shippingData.address,
+        shipping_city: shippingData.city,
+        shipping_state: shippingData.district,
+        shipping_pincode: shippingData.pincode,
+        products: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          mrp: item.mrp,
+          quantity: item.quantity,
+        })),
+        subtotal: cartTotal,
+        shipping_charge: shippingCost,
+        total_amount: total,
+        payment_method: 'razorpay_upi',
+      };
+
+      // Create order in database first
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...orderData,
+          razorpay_order_id: `order_${Date.now()}`, // Temporary ID
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
+
+      const { order } = await response.json();
+
+      // Initialize Razorpay (you need to add Razorpay script in your layout)
+      // For now, we'll simulate success and redirect
+      // In production, integrate actual Razorpay payment flow here
+
+      clearCart();
+      router.push(`/order-success?orderId=${order.id}`);
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert('Failed to place order. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (cart.length === 0) {

@@ -2,16 +2,46 @@
 
 import Link from 'next/link';
 import { Fish, Bird, Mail, Phone, MapPin, Instagram, Facebook, Youtube, Twitter, Smartphone, HelpCircle, FileText, Truck, CreditCard, RefreshCw, MessageCircle } from 'lucide-react';
-import { categories } from '@/data/products';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('categories')
+          .select('id, name, slug')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (data) {
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <footer className="bg-slate-800 text-slate-300">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           {/* About */}
           <div className="col-span-2">
             <div className="flex items-center gap-2 mb-4">
@@ -25,7 +55,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
-              India's premier destination for premium aquascaping supplies and hand-raised exotic birds. 
+              India's premier destination for premium aquascaping supplies and hand-raised exotic birds.
               Serving passionate hobbyists across Tamil Nadu since 2015.
             </p>
             <div className="flex gap-2">
@@ -44,31 +74,20 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Useful Links */}
-          <div>
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Useful Links</h4>
-            <ul className="space-y-2.5">
-              {['About Us', 'Contact Us', 'Careers', 'Sell On Rainbow Aqua', 'Gift Cards'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-sm text-slate-400 hover:text-primary-400 transition-colors">
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Help */}
           <div>
             <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Help</h4>
             <ul className="space-y-2.5">
-              {['Track Order', 'Shipping Policy', 'Return Policy', 'FAQ', 'Payments'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-sm text-slate-400 hover:text-primary-400 transition-colors">
-                    {item}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link href="/faq" className="text-sm text-slate-400 hover:text-primary-400 transition-colors">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/payments" className="text-sm text-slate-400 hover:text-primary-400 transition-colors">
+                  Payments
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -76,13 +95,13 @@ export function Footer() {
           <div>
             <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Categories</h4>
             <ul className="space-y-2.5">
-              {categories.slice(0, 5).map((category) => (
+              {categories.map((category) => (
                 <li key={category.id}>
-                  <Link 
+                  <Link
                     href={`/category/${category.slug}`}
                     className="text-sm text-slate-400 hover:text-primary-400 transition-colors"
                   >
-                    {category.name.split('&')[0].trim()}
+                    {category.name}
                   </Link>
                 </li>
               ))}

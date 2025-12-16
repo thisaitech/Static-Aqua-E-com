@@ -9,12 +9,8 @@ import { ArrowLeft, Upload, X } from 'lucide-react'
 interface Category {
   id: string
   name: string
-}
-
-interface CategoryType {
-  id: string
-  name: string
-  category_id: string
+  types: string[]
+  category: string[]
 }
 
 export default function AddProductPage() {
@@ -25,15 +21,16 @@ export default function AddProductPage() {
   
   // Categories and Types
   const [categories, setCategories] = useState<Category[]>([])
-  const [types, setTypes] = useState<CategoryType[]>([])
-  const [filteredTypes, setFilteredTypes] = useState<CategoryType[]>([])
+  const [availableTypes, setAvailableTypes] = useState<string[]>([])
+  const [availableCategories, setAvailableCategories] = useState<string[]>([])
   
   // Form State
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     category_id: '',
-    type_id: '',
+    type: '',
+    product_category: '',
     image_url: '',
     
     // Pricing
@@ -58,16 +55,12 @@ export default function AddProductPage() {
     show_in_category: true,
     is_featured: false,
     
-    // Button Type
-    button_type: 'add_to_cart',
-    
     // Status
     is_active: true
   })
 
   useEffect(() => {
     fetchCategories()
-    fetchTypes()
   }, [])
 
   useEffect(() => {
@@ -81,35 +74,51 @@ export default function AddProductPage() {
     }
   }, [formData.name])
 
-  useEffect(() => {
-    // Filter types when category changes
-    if (formData.category_id) {
-      const filtered = types.filter(t => t.category_id === formData.category_id)
-      setFilteredTypes(filtered)
-      setFormData(prev => ({ ...prev, type_id: '' }))
-    } else {
-      setFilteredTypes([])
-    }
-  }, [formData.category_id, types])
+
 
   const fetchCategories = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('categories')
-      .select('id, name')
+      .select('id, name, types, category')
       .eq('is_active', true)
       .order('display_order')
     
-    setCategories(data || [])
+    if (error) {
+      console.error('Error fetching categories:', error)
+    } else {
+      console.log('Categories fetched:', data)
+      setCategories(data || [])
+    }
   }
 
-  const fetchTypes = async () => {
-    const { data } = await supabase
-      .from('category_types')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order')
+  const handleCategoryChange = (categoryId: string) => {
+    setFormData({ ...formData, category_id: categoryId, type: '', product_category: '' })
     
-    setTypes(data || [])
+    const selectedCategory = categories.find(cat => cat.id === categoryId)
+    console.log('=== Category Change Debug ===')
+    console.log('Category ID:', categoryId)
+    console.log('Selected category:', selectedCategory)
+    console.log('Types from category:', selectedCategory?.types)
+    console.log('Is array?:', Array.isArray(selectedCategory?.types))
+    console.log('Categories from category:', selectedCategory?.category)
+    console.log('Is array?:', Array.isArray(selectedCategory?.category))
+    
+    if (selectedCategory && selectedCategory.category && selectedCategory.category.length > 0) {
+      console.log('✓ Setting available categories:', selectedCategory.category)
+      setAvailableCategories(selectedCategory.category)
+    } else {
+      console.log('✗ No categories found, clearing dropdown')
+      setAvailableCategories([])
+    }
+    console.log('Length:', selectedCategory?.types?.length)
+    
+    if (selectedCategory && selectedCategory.types && selectedCategory.types.length > 0) {
+      console.log('✓ Setting available types:', selectedCategory.types)
+      setAvailableTypes(selectedCategory.types)
+    } else {
+      console.log('✗ No types found, clearing dropdown')
+      setAvailableTypes([])
+    }
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,11 +174,13 @@ export default function AddProductPage() {
       const productData = {
         name: formData.name,
         slug: formData.slug,
-        category_id: formData.category_id,
-        type_id: formData.type_id || null,
+        category: formData.category_id,
+        type: formData.type || null,
+        product_category: formData.product_category || null,
         image_url: formData.image_url,
         
         contact_for_price: formData.contact_for_price,
+        original_price: formData.contact_for_price ? 0 : parseFloat(formData.price) || 0,
         price: formData.contact_for_price ? null : parseFloat(formData.price) || null,
         mrp: formData.mrp ? parseFloat(formData.mrp) : null,
         discount_percent: formData.discount_percent ? parseInt(formData.discount_percent) : 0,
@@ -185,8 +196,6 @@ export default function AddProductPage() {
         
         show_in_category: formData.show_in_category,
         is_featured: formData.is_featured,
-        
-        button_type: formData.button_type,
         is_active: formData.is_active
       }
 
@@ -254,14 +263,14 @@ export default function AddProductPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.category_id}
-                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                 >
                   <option value="">Select Category</option>
@@ -270,20 +279,39 @@ export default function AddProductPage() {
                   ))}
                 </select>
               </div>
+            </div>
 
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Type (Sub-category)
+                  Type 
                 </label>
                 <select
-                  value={formData.type_id}
-                  onChange={(e) => setFormData({ ...formData, type_id: e.target.value })}
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   disabled={!formData.category_id}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="">Select Type</option>
-                  {filteredTypes.map(type => (
-                    <option key={type.id} value={type.id}>{type.name}</option>
+                  {availableTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category Filter
+                </label>
+                <select
+                  value={formData.product_category}
+                  onChange={(e) => setFormData({ ...formData, product_category: e.target.value })}
+                  disabled={!formData.category_id}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select Category</option>
+                  {availableCategories.map(category => (
+                    <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
               </div>
@@ -526,25 +554,7 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* 8. BUTTON TYPE */}
-        <div>
-          <h2 className="text-lg font-semibold text-[#0F172A] mb-4">Action Button</h2>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Button Type
-            </label>
-            <select
-              value={formData.button_type}
-              onChange={(e) => setFormData({ ...formData, button_type: e.target.value })}
-              className="w-full max-w-xs px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-            >
-              <option value="add_to_cart">Add to Cart</option>
-              <option value="contact_store">Contact Store</option>
-            </select>
-          </div>
-        </div>
-
-        {/* 9. STATUS */}
+        {/* 8. STATUS */}
         <div>
           <h2 className="text-lg font-semibold text-[#0F172A] mb-4">Status</h2>
           <div className="flex items-center gap-2">

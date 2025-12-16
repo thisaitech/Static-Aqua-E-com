@@ -2,18 +2,16 @@
 
 import { motion } from 'framer-motion';
 import { ProductCard } from '@/components/products/ProductCard';
-import { 
-  getFeaturedProducts, 
-  getNewArrivals, 
-  getBestSellers 
-} from '@/data/products';
+import { Product } from '@/data/products';
 import { Sparkles, Clock, TrendingUp, ChevronRight, Star, Flame, Gift } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 interface ProductSectionProps {
   title: string;
   icon: React.ReactNode;
-  products: ReturnType<typeof getFeaturedProducts>;
+  products: Product[];
   viewAllLink?: string;
   bgColor?: string;
   iconBg?: string;
@@ -66,26 +64,87 @@ function ProductSection({
 }
 
 export function FeaturedProducts() {
-  const products = getFeaturedProducts();
+  const [products, setProducts] = useState<Product[]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_featured', true)
+        .eq('is_active', true)
+        .limit(8);
+      
+      if (!error && data) {
+        setProducts(data.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price || 0,
+          originalPrice: p.mrp || undefined,
+          image: p.image_url,
+          category: p.category,
+          rating: p.rating || 4.0,
+          inStock: p.stock_status === 'in_stock',
+          isNew: p.is_new || false,
+          isBestSeller: p.is_best_seller || false,
+          slug: p.slug
+        })));
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <ProductSection
       title="Featured Products"
       icon={<Star className="w-5 h-5" />}
       products={products}
-      viewAllLink="/category/all"
+      viewAllLink="/featured-products"
       iconBg="bg-amber-100 text-amber-600"
     />
   );
 }
 
 export function NewArrivals() {
-  const products = getNewArrivals();
+  const [products, setProducts] = useState<Product[]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_new', true)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(8);
+      
+      if (!error && data) {
+        setProducts(data.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price || 0,
+          originalPrice: p.mrp || undefined,
+          image: p.image_url,
+          category: p.category,
+          rating: p.rating || 4.0,
+          inStock: p.stock_status === 'in_stock',
+          isNew: p.is_new || false,
+          isBestSeller: p.is_best_seller || false,
+          slug: p.slug
+        })));
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <ProductSection
       title="New Arrivals"
       icon={<Sparkles className="w-5 h-5" />}
       products={products}
-      viewAllLink="/category/all?filter=new"
+      viewAllLink="/new-arrivals"
       bgColor="bg-slate-50 dark:bg-slate-900"
       iconBg="bg-blue-100 text-blue-600"
     />
@@ -93,13 +152,43 @@ export function NewArrivals() {
 }
 
 export function BestSellers() {
-  const products = getBestSellers();
+  const [products, setProducts] = useState<Product[]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_best_seller', true)
+        .eq('is_active', true)
+        .limit(8);
+      
+      if (!error && data) {
+        setProducts(data.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price || 0,
+          originalPrice: p.mrp || undefined,
+          image: p.image_url,
+          category: p.category,
+          rating: p.rating || 4.0,
+          inStock: p.stock_status === 'in_stock',
+          isNew: p.is_new || false,
+          isBestSeller: p.is_best_seller || false,
+          slug: p.slug
+        })));
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <ProductSection
       title="Best Sellers"
       icon={<Flame className="w-5 h-5" />}
       products={products}
-      viewAllLink="/category/all?filter=bestseller"
+      viewAllLink="/best-sellers"
       iconBg="bg-red-100 text-red-600"
     />
   );
@@ -107,7 +196,40 @@ export function BestSellers() {
 
 // Special Offers Section
 export function SpecialOffers() {
-  const products = getFeaturedProducts().filter(p => p.originalPrice && p.originalPrice > p.price);
+  const [products, setProducts] = useState<Product[]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .not('mrp', 'is', null)
+        .not('price', 'is', null)
+        .limit(8);
+      
+      if (!error && data) {
+        // Filter products with actual discounts (mrp > price)
+        const discountedProducts = data.filter(p => p.mrp && p.price && p.mrp > p.price);
+        setProducts(discountedProducts.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price || 0,
+          originalPrice: p.mrp || undefined,
+          image: p.image_url,
+          category: p.category,
+          rating: p.rating || 4.0,
+          inStock: p.stock_status === 'in_stock',
+          isNew: p.is_new || false,
+          isBestSeller: p.is_best_seller || false,
+          slug: p.slug
+        })));
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <ProductSection
       title="Special Offers"

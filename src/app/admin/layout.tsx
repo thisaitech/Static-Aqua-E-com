@@ -4,23 +4,21 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
-import { 
-  LayoutDashboard, 
-  Package, 
-  Tag, 
+import {
+  LayoutDashboard,
+  Package,
+  Tag,
   Image as ImageIcon,
-  ShoppingBag, 
-  Users, 
-  BarChart3, 
-  FileText, 
-  Settings, 
-  Store,
+  ShoppingBag,
+  Users,
+  Settings,
   Menu,
   X,
   LogOut,
   ChevronDown,
   List,
-  Grid3x3
+  Grid3x3,
+  Flame
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -28,12 +26,10 @@ const menuItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/categories', label: 'Categories', icon: Grid3x3 },
-  { href: '/admin/types', label: 'Types', icon: List },
-  { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
+  { href: '/admin/banners', label: 'Hero Banners', icon: ImageIcon },
+  { href: '/admin/top-deals', label: 'Top Deals', icon: Flame },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/admin/reports', label: 'Reports', icon: FileText },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -118,7 +114,7 @@ export default function AdminLayout({
             {menuItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
-              
+
               return (
                 <Link
                   key={item.href}
@@ -135,17 +131,6 @@ export default function AdminLayout({
                 </Link>
               )
             })}
-            
-            {/* Back to Store */}
-            <div className="border-t border-slate-700 mt-4 pt-4">
-              <Link
-                href="/"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#CBD5E1] hover:bg-slate-800 hover:text-white transition-colors"
-              >
-                <Store className="w-5 h-5" />
-                Back to Store
-              </Link>
-            </div>
           </nav>
         </div>
       </aside>

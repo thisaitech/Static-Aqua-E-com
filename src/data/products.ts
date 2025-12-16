@@ -6,12 +6,16 @@ export interface Product {
   category: string;
   subcategory?: string;
   image: string;
-  description: string;
+  description?: string;
   inStock: boolean;
   isNew?: boolean;
   isBestSeller?: boolean;
   isFeatured?: boolean;
   contactForPrice?: boolean;
+  slug?: string;
+  rating?: number;
+  type?: string;
+  product_category?: string;
 }
 
 export interface Category {
@@ -184,6 +188,19 @@ export const categories: Category[] = [
       { name: 'Bird Foods', slug: 'bird-foods' },
       { name: 'Medicines', slug: 'medicines' },
       { name: 'Supplements', slug: 'supplements' },
+    ],
+  },
+  {
+    id: 'equipment',
+    name: 'Professional Equipment',
+    slug: 'equipment',
+    image: '/fish/fish%208.jpg',
+    description: 'Top-grade aquatic and avian equipment from trusted brands',
+    subcategories: [
+      { name: 'CO2 Systems', slug: 'co2' },
+      { name: 'Aquarium Lights', slug: 'lights' },
+      { name: 'Filters', slug: 'filters' },
+      { name: 'Air Pumps', slug: 'air-pumps' },
     ],
   },
   {
@@ -685,7 +702,7 @@ export const products: Product[] = [
     id: 'ada-bio-rio-1l',
     name: 'ADA Nature Aquarium Bio-Rio 1L',
     price: 1125,
-    category: 'co2-lighting',
+    category: 'equipment',
     subcategory: 'filters',
     image: '/fish/fish%208.jpg',
     description: 'Premium biological filter media',

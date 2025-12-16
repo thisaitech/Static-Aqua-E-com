@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  Heart, 
-  ShoppingCart, 
-  User, 
-  Menu, 
+import {
+  Search,
+  Heart,
+  ShoppingCart,
+  User,
+  Menu,
   X,
   Sun,
   Moon,
@@ -16,20 +16,19 @@ import {
   Bird,
   ChevronDown,
   MapPin,
-  Truck
+  Truck,
+  Package
 } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 import { useAuth } from '@/context/AuthContext';
-import { categories } from '@/data/products';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 
-interface DbCategory {
+interface NavCategory {
   id: string;
   name: string;
-  image_url: string | null;
-  is_active: boolean;
-  display_order: number;
+  slug: string;
+  show_in_hero: boolean;
 }
 
 export function Header() {
@@ -40,8 +39,7 @@ export function Header() {
   const [isDark, setIsDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [dbCategories, setDbCategories] = useState<DbCategory[]>([]);
-
+  const [mainCategories, setMainCategories] = useState<NavCategory[]>([]);
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -67,14 +65,19 @@ export function Header() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('categories')
-        .select('id, name, image_url, is_active, display_order')
+        .select('id, name, slug, show_in_hero')
         .eq('is_active', true)
+        .eq('show_in_hero', true)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
-      setDbCategories(data || []);
+      if (data && data.length > 0) {
+        setMainCategories(data);
+      } else {
+        setMainCategories([]);
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setMainCategories([]);
     }
   };
 
@@ -93,25 +96,6 @@ export function Header() {
     };
     return iconMap[name.toLowerCase()] || '📦';
   };
-
-  const mainCategories = dbCategories.length > 0 
-    ? dbCategories.map(cat => {
-        const slug = cat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        return {
-          href: `/category/${slug}`,
-          label: cat.name,
-          icon: getCategoryIcon(cat.name),
-          highlight: cat.name.toLowerCase().includes('fancy birds')
-        };
-      })
-    : [
-        { href: '/category/fish-tanks', label: 'Fish Tanks', icon: '🐠' },
-        { href: '/category/live-plants', label: 'Live Plants', icon: '🌿' },
-        { href: '/category/fancy-birds', label: 'Fancy Birds', icon: '🦜', highlight: true },
-        { href: '/category/co2-lighting', label: 'Equipment', icon: '⚡' },
-        { href: '/category/live-fish', label: 'Live Fish', icon: '🐟' },
-        { href: '/category/bird-supplies', label: 'Bird Supplies', icon: '🏠' },
-      ];
 
   return (
     <>
@@ -211,8 +195,17 @@ export function Header() {
                 <ChevronDown className="w-4 h-4 text-slate-400" />
               </button>
 
+              {/* My Orders */}
+              <Link
+                href="/my-orders"
+                className="hidden lg:flex items-center gap-1 p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <Package className="w-5 h-5" />
+                <span className="text-sm font-medium">Orders</span>
+              </Link>
+
               {/* Wishlist */}
-              <Link 
+              <Link
                 href="/wishlist"
                 className="relative p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
@@ -228,7 +221,7 @@ export function Header() {
               </Link>
 
               {/* Cart - Flipkart style */}
-              <button 
+              <button
                 onClick={toggleCart}
                 className="relative flex items-center gap-1 p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
@@ -285,17 +278,17 @@ export function Header() {
             <nav className="flex items-center gap-1 py-2 overflow-x-auto">
               {mainCategories.map((cat, index) => (
                 <Link
-                  key={cat.href}
-                  href={cat.href}
+                  key={cat.id}
+                  href={`/category/${cat.slug}`}
                   className={cn(
                     'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
-                    cat.highlight
+                    cat.show_in_hero
                       ? 'bg-primary-50 text-primary-700 hover:bg-primary-100'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
                   )}
                 >
-                  <span>{cat.icon}</span>
-                  {cat.label}
+                  <span>{getCategoryIcon(cat.name)}</span>
+                  {cat.name}
                 </Link>
               ))}
             </nav>
@@ -356,28 +349,20 @@ export function Header() {
                   Shop by Category
                 </p>
                 <div className="space-y-1">
-                  {categories.map((cat) => (
+                  {mainCategories.map((cat) => (
                     <Link
                       key={cat.id}
                       href={`/category/${cat.slug}`}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={cn(
                         'flex items-center gap-3 px-3 py-3 rounded-lg transition-colors',
-                        cat.id === 'fancy-birds'
+                        cat.show_in_hero
                           ? 'bg-primary-50 text-primary-700'
                           : 'text-slate-600 hover:bg-slate-100'
                       )}
                     >
                       <span className="text-lg">
-                        {cat.id === 'fish-tanks' && '🐠'}
-                        {cat.id === 'live-plants' && '🌿'}
-                        {cat.id === 'fancy-birds' && '🦜'}
-                        {cat.id === 'co2-lighting' && '⚡'}
-                        {cat.id === 'live-fish' && '🐟'}
-                        {cat.id === 'bird-supplies' && '🏠'}
-                        {cat.id === 'foods-medicines' && '💊'}
-                        {cat.id === 'tank-accessories' && '🔧'}
-                        {cat.id === 'accessories' && '🛠️'}
+                        {getCategoryIcon(cat.name)}
                       </span>
                       <span className="font-medium">{cat.name}</span>
                     </Link>
@@ -387,6 +372,14 @@ export function Header() {
                 <div className="border-t border-slate-200 my-4" />
 
                 <div className="space-y-1">
+                  <Link
+                    href="/my-orders"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 hover:bg-slate-100"
+                  >
+                    <Package className="w-5 h-5" />
+                    <span>My Orders</span>
+                  </Link>
                   <Link
                     href="/wishlist"
                     onClick={() => setIsMobileMenuOpen(false)}
