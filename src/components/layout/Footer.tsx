@@ -55,7 +55,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
-              India's premier destination for premium aquascaping supplies and hand-raised exotic birds.
+              India&apos;s premier destination for premium aquascaping supplies and hand-raised exotic birds.
               Serving passionate hobbyists across Tamil Nadu since 2015.
             </p>
             <div className="flex gap-2">

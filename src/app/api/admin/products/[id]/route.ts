@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 
 // GET single product
 export async function GET(
@@ -8,8 +7,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    // removed cookieStore
+    const supabase = createClient()
 
     const { data: product, error } = await supabase
       .from('products')
@@ -37,8 +36,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    // removed cookieStore
+    const supabase = createClient()
 
     // Verify user is admin
     const { data: { user } } = await supabase.auth.getUser()
@@ -71,8 +70,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    // removed cookieStore
+    const supabase = createClient()
 
     // Verify user is admin
     const { data: { user } } = await supabase.auth.getUser()

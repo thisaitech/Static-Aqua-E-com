@@ -197,10 +197,10 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
 
   // Get the first filter type name for "All" option
   const getFirstFilterTypeName = () => {
-    if (filterTypes.length > 0) {
-      const firstType = filterTypes[0];
-      if (firstType.filter_name.startsWith('All ')) {
-        return firstType.filter_name;
+    if (dbCategory?.types && dbCategory.types.length > 0) {
+      const firstType = dbCategory.types[0];
+      if (firstType.startsWith('All ')) {
+        return firstType;
       }
     }
     return `All ${dbCategory?.name || 'Products'}`;
@@ -265,11 +265,11 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
                   <Filter className="w-5 h-5 text-slate-600" />
                   <h2 className="font-bold text-slate-800 dark:text-white">Filters</h2>
                 </div>
-                <button 
+                <button
                   onClick={() => {
                     setSelectedSubcategory(null);
-                    setSelectedFilterType(null);
-                    setSelectedge([0, 200000]);
+                    setSelectedCategories([]);
+                    setPriceRange([0, 200000]);
                     setShowInStockOnly(false);
                   }}
                   className="text-sm text-primary-600 hover:underline"
@@ -605,7 +605,7 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
                 <p className="text-slate-500 mb-6">Try adjusting your filters</p>
                 <Button variant="outline" onClick={() => {
                   setSelectedSubcategory(null);
-                  setSelectedFilterType(null);
+                  setSelectedSubcategory(null);
                   setPriceRange([0, 200000]);
                   setShowInStockOnly(false);
                 }}>
@@ -635,8 +635,8 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
             </div>
             
             <div className="p-4 space-y-6">
-              {/* Dynamic Filter Types */}
-              {!loadingFilters && filterTypes.length > 0 && (
+              {/* Dynamic Filter Types - Commented out until filterTypes is properly defined */}
+              {/* {!loadingFilters && filterTypes.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-sm text-slate-800 dark:text-white uppercase mb-3">
                     Type
@@ -648,7 +648,7 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
                           type="radio"
                           name="mobile-filterType"
                           checked={index === 0 ? !selectedFilterType : selectedFilterType === filterType.id}
-                          onChange={() => setSelectedFilterType(index === 0 ? null : filterType.id)}
+                          onChange={() => setSelectedSubcategory(index === 0 ? null : filterType.id)}
                           className="w-4 h-4 text-primary-600"
                         />
                         <span className="text-sm text-slate-600 dark:text-slate-300">{filterType.filter_name}</span>
@@ -656,7 +656,7 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Dynamic Subcategories from Database */}
               {!loadingFilters && dbCategory && dbCategory.types && dbCategory.types.length > 0 && (
@@ -691,8 +691,8 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
                 </div>
               )}
 
-              {/* Fallback to static subcategories */}
-              {!loadingFilters && (!dbCategory || !dbCategory.types || dbCategory.types.length === 0) && 
+              {/* Fallback to static subcategories - Commented out until category variable is defined */}
+              {/* {!loadingFilters && (!dbCategory || !dbCategory.types || dbCategory.types.length === 0) &&
                category.subcategories && category.subcategories.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-sm text-slate-800 dark:text-white uppercase mb-3">
@@ -723,7 +723,7 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* In Stock Toggle */}
               <div>
@@ -747,7 +747,7 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
                 className="flex-1"
                 onClick={() => {
                   setSelectedSubcategory(null);
-                  setSelectedFilterType(null);
+                  setSelectedSubcategory(null);
                   setShowInStockOnly(false);
                 }}
               >

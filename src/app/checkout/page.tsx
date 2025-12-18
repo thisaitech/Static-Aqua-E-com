@@ -308,7 +308,7 @@ export default function CheckoutPage() {
           name: item.product.name,
           image: item.product.image,
           price: item.product.price,
-          mrp: item.product.mrp,
+          mrp: item.product.originalPrice || item.product.price,
           quantity: item.quantity,
         })),
         subtotal: cartTotal,

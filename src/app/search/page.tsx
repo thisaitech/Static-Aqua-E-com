@@ -84,7 +84,7 @@ function SearchResults() {
           <p className="text-slate-600 dark:text-slate-400">
             {query ? (
               <>
-                Showing results for <span className="font-semibold text-primary-600 dark:text-primary-400">"{query}"</span>
+                Showing results for <span className="font-semibold text-primary-600 dark:text-primary-400">&quot;{query}&quot;</span>
               </>
             ) : (
               'Enter a search term to find products'
@@ -115,7 +115,7 @@ function SearchResults() {
               No products found
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-center max-w-md">
-              We couldn't find any products matching "{query}". Try searching with different keywords or browse our categories.
+              We couldn&apos;t find any products matching &quot;{query}&quot;. Try searching with different keywords or browse our categories.
             </p>
           </div>
         )}

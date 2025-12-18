@@ -241,7 +241,7 @@ export default function OrderSuccessPage() {
               </div>
               <div className="text-left">
                 <p className="font-medium text-slate-800">Order Confirmation</p>
-                <p className="text-sm text-slate-500">You'll receive an email with order details</p>
+                <p className="text-sm text-slate-500">You&apos;ll receive an email with order details</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -250,7 +250,7 @@ export default function OrderSuccessPage() {
               </div>
               <div className="text-left">
                 <p className="font-medium text-slate-800">Shipping Update</p>
-                <p className="text-sm text-slate-500">We'll notify you when your order ships</p>
+                <p className="text-sm text-slate-500">We&apos;ll notify you when your order ships</p>
               </div>
             </div>
           </div>

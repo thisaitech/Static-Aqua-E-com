@@ -195,7 +195,7 @@ export default function ProductsPage() {
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg p-12 text-center">
-            <p className="text-gray-600">No products found. Click "+ Add Product" to create your first product.</p>
+            <p className="text-gray-600">No products found. Click &quot;+ Add Product&quot; to create your first product.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 lg:gap-6">

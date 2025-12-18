@@ -169,9 +169,9 @@ export default function CategoriesPage() {
         </div>
         <Button
           onClick={() => {
-            setEditingCategory(null), show_in_hero: false
-            setFormData({ name: '', image_url: '' })
-            setShowModal(true)
+            setEditingCategory(null);
+            setFormData({ name: '', image_url: '', show_in_hero: false });
+            setShowModal(true);
           }}
           className="bg-blue-600 hover:bg-blue-700"
         >

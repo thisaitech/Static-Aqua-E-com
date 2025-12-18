@@ -108,7 +108,7 @@ export default function TestCategoriesPage() {
           <h3 className="font-bold mb-2">Instructions:</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm">
             <li>Open browser console (F12)</li>
-            <li>Click "Refresh & Log to Console" button</li>
+            <li>Click &quot;Refresh &amp; Log to Console&quot; button</li>
             <li>Check console for detailed logging of category data</li>
             <li>Verify types are being stored and retrieved correctly</li>
           </ol>

@@ -55,7 +55,7 @@ export default function CategoriesPage() {
       }
       console.log('Categories fetched:', data);
       setCategories(data || [])
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching categories:', error)
       if (error.message?.includes('relation "categories" does not exist')) {
         alert('Categories table does not exist in database. Please run the SQL script first.');
@@ -170,7 +170,7 @@ export default function CategoriesPage() {
       setEditingCategory(null)
       await fetchCategories()
       console.log('Categories refreshed');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving category:', error)
       alert(`Failed to save category: ${error.message || 'Unknown error'}`)
     }

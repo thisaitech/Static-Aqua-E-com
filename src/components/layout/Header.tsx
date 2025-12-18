@@ -289,7 +289,7 @@ export function Header() {
                       onClick={handleViewAllResults}
                       className="w-full px-4 py-3 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-center"
                     >
-                      View all results for "{searchQuery}"
+                      View all results for &quot;{searchQuery}&quot;
                     </button>
                   )}
                 </div>
@@ -513,7 +513,7 @@ export function Header() {
                       }}
                       className="w-full px-3 py-2.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-center"
                     >
-                      View all results for "{searchQuery}"
+                      View all results for &quot;{searchQuery}&quot;
                     </button>
                   </div>
                 )}

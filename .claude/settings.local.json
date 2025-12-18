@@ -11,7 +11,10 @@
       "Bash(git push:*)",
       "Bash(vercel --version:*)",
       "Bash(winget install:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "Bash(git commit:*)",
+      "Bash(vercel --prod:*)",
+      "Bash(grep:*)"
     ]
   }
 }

@@ -165,7 +165,7 @@ export default function BannersPage() {
       return;
     }
     try {
-      const dataToSave = { ...bannerFormData };
+      const dataToSave: any = { ...bannerFormData };
       // Remove any accidental image/bg_color fields
       delete dataToSave.desktop_image;
       delete dataToSave.mobile_image;
@@ -317,14 +317,14 @@ export default function BannersPage() {
               className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 overflow-hidden hover:shadow-2xl hover:shadow-purple-200/50 hover:scale-105 transition-all duration-300"
             >
               {/* Banner Image Preview */}
-              {banner.desktop_image && (
+              {(banner as any).desktop_image && (
                 <div className="relative h-24 sm:h-32 bg-gray-100">
                   <img
-                    src={banner.desktop_image}
+                    src={(banner as any).desktop_image}
                     alt={banner.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className={`absolute inset-0 bg-gradient-to-br ${banner.bg_color}`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${(banner as any).bg_color}`} />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <h3 className="text-white font-bold text-sm sm:text-lg px-4 text-center line-clamp-2">{banner.title}</h3>
                   </div>
@@ -343,7 +343,7 @@ export default function BannersPage() {
                   <div className="flex-1 min-w-0">
                     {/* Title & Status */}
                     <div className="flex items-center gap-2 mb-1">
-                      {!banner.desktop_image && (
+                      {!(banner as any).desktop_image && (
                         <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">{banner.title}</h3>
                       )}
                       <button
@@ -380,8 +380,8 @@ export default function BannersPage() {
                         <span className="text-purple-600 font-medium">🎥 Video</span>
                       ) : (
                         <>
-                          {banner.desktop_image && <span className="text-emerald-600 font-medium">✓ Desktop</span>}
-                          {banner.mobile_image && <span className="text-emerald-600 font-medium">✓ Mobile</span>}
+                          {(banner as any).desktop_image && <span className="text-emerald-600 font-medium">✓ Desktop</span>}
+                          {(banner as any).mobile_image && <span className="text-emerald-600 font-medium">✓ Mobile</span>}
                         </>
                       )}
                     </div>
@@ -524,7 +524,7 @@ export default function BannersPage() {
                             className="w-full h-48 object-cover rounded-xl"
                             controls
                           />
-                          <div className={`absolute inset-0 bg-gradient-to-br ${bannerFormData.bg_color} opacity-50 rounded-xl pointer-events-none`} />
+                          <div className={`absolute inset-0 bg-gradient-to-br ${(bannerFormData as any).bg_color} opacity-50 rounded-xl pointer-events-none`} />
                         </div>
                         <button
                           onClick={() => setBannerFormData({ ...bannerFormData, video_url: '' })}

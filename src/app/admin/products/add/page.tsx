@@ -438,7 +438,7 @@ export default function AddProductPage() {
                 className="w-4 h-4 text-[#2563EB] rounded focus:ring-[#2563EB]"
               />
               <label htmlFor="is_new" className="text-sm font-medium text-gray-700">
-                New Product (shows "NEW" badge)
+                New Product (shows &quot;NEW&quot; badge)
               </label>
             </div>
 

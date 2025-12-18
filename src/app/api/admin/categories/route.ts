@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 
 // GET all categories
 export async function GET() {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    const supabase = createClient()
 
     const { data: categories, error } = await supabase
       .from('categories')
@@ -27,8 +25,8 @@ export async function GET() {
 // POST create new category (admin only)
 export async function POST(request: Request) {
   try {
-    const cookieStore = cookies()
-    const supabase = createServerClient(cookieStore)
+    // removed cookieStore
+    const supabase = createClient()
 
     // Verify user is admin
     const { data: { user } } = await supabase.auth.getUser()
