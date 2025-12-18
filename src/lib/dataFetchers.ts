@@ -33,6 +33,7 @@ export interface Product {
   image: string;
   description: string;
   inStock: boolean;
+  stockStatus?: string;
   isNew?: boolean;
   isBestSeller?: boolean;
   isFeatured?: boolean;
