@@ -7,7 +7,9 @@
       "Bash(npm run build:*)",
       "Bash(cat:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nImplement stock status system and admin dashboard improvements\n\n- Add three-tier stock status badges \\(in_stock, low_stock, out_of_stock\\)\n- Implement low stock and out of stock alerts in admin dashboard\n- Fix stock quantity reduction on purchase using service role client\n- Add real-time auto-refresh for admin dashboard\n- Remove customer support section from FAQ page\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nImplement stock status system and admin dashboard improvements\n\n- Add three-tier stock status badges \\(in_stock, low_stock, out_of_stock\\)\n- Implement low stock and out of stock alerts in admin dashboard\n- Fix stock quantity reduction on purchase using service role client\n- Add real-time auto-refresh for admin dashboard\n- Remove customer support section from FAQ page\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(vercel --version:*)"
     ]
   }
 }
