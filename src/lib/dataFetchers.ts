@@ -397,6 +397,7 @@ function transformProduct(dbProduct: any): Product {
     image: dbProduct.image_url || '',
     description: dbProduct.description || '',
     inStock: dbProduct.stock_status === 'in_stock',
+    stockStatus: dbProduct.stock_status,
     isNew: dbProduct.is_new || false,
     isBestSeller: dbProduct.is_best_seller || false,
     isFeatured: dbProduct.is_featured || false,

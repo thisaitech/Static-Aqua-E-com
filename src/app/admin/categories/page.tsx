@@ -257,7 +257,7 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-3 sm:mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#0F172A]">Categories</h1>
+          <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">Categories</h1>
           <p className="text-xs sm:text-sm text-gray-600">
             {loading ? 'Loading...' : `${categories.length} categories`}
           </p>
@@ -270,7 +270,7 @@ export default function CategoriesPage() {
             setNewCategoryName('')
             setShowModal(true)
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-2 py-1.5 sm:px-4 sm:py-2"
+          className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-xs sm:text-sm px-2 py-1.5 sm:px-4 sm:py-2 rounded-xl font-semibold shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
         >
           <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
           Add
@@ -278,66 +278,92 @@ export default function CategoriesPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="text-center py-12 text-gray-600">Loading...</div>
       ) : categories.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 sm:p-12 text-center">
-          <p className="text-gray-500 mb-4">No categories yet</p>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg p-8 sm:p-12 text-center">
+          <p className="text-gray-600 mb-4">No categories yet</p>
           <Button
             onClick={() => setShowModal(true)}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 rounded-xl font-semibold shadow-lg"
           >
             Add Your First Category
           </Button>
         </div>
       ) : (
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-3">
           {categories.map((category) => (
             <div
               key={category.id}
-              className="bg-white rounded-xl border-2 border-blue-100 p-3 sm:p-4 hover:border-blue-400 hover:shadow-lg transition-all duration-200"
+              className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 p-3 sm:p-4 hover:shadow-2xl hover:shadow-purple-200/50 hover:scale-105 transition-all duration-300"
             >
-              <div className="flex items-start gap-3">
-                {/* Category Image */}
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-md">
-                  {category.image_url ? (
-                    <img
-                      src={category.image_url}
-                      alt={category.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <ImageIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-                  )}
+              {/* Mobile: Stack layout | Desktop: Flex layout */}
+              <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                {/* Row 1: Image + Title + Status (Mobile) / Image (Desktop) */}
+                <div className="flex items-center gap-3 sm:block">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {category.image_url ? (
+                      <img
+                        src={category.image_url}
+                        alt={category.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    )}
+                  </div>
+
+                  {/* Title + Status (Mobile only) */}
+                  <div className="flex-1 sm:hidden">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-sm text-gray-900">
+                        {category.name}
+                      </h3>
+                      {category.show_in_hero && (
+                        <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                      )}
+                    </div>
+                    <button
+                      onClick={() => toggleActive(category.id, category.is_active)}
+                      className={`mt-1 text-xs px-2 py-0.5 rounded-full font-semibold transition-all duration-300 ${
+                        category.is_active
+                          ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-white shadow-lg'
+                          : 'bg-gradient-to-r from-slate-300 to-slate-400 text-white shadow-lg'
+                      }`}
+                    >
+                      {category.is_active ? 'Active' : 'Inactive'}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Category Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <h3 className="font-bold text-sm sm:text-base text-[#0F172A] truncate">
+                  {/* Title + Status (Desktop only) */}
+                  <div className="hidden sm:flex items-center gap-2 mb-2 flex-wrap">
+                    <h3 className="font-semibold text-base text-gray-900">
                       {category.name}
                     </h3>
                     {category.show_in_hero && (
-                      <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                     )}
                     <button
                       onClick={() => toggleActive(category.id, category.is_active)}
-                      className={`text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full font-medium flex-shrink-0 ${
+                      className={`text-xs px-2 py-1 rounded-full font-semibold transition-all duration-300 ${
                         category.is_active
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-600'
+                          ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-white shadow-lg'
+                          : 'bg-gradient-to-r from-slate-300 to-slate-400 text-white shadow-lg'
                       }`}
                     >
                       {category.is_active ? 'Active' : 'Inactive'}
                     </button>
                   </div>
 
-                  {/* Types/Subcategories */}
+                  {/* Types */}
                   {category.types && category.types.length > 0 && (
                     <div className="mb-2">
-                      <p className="text-[10px] text-gray-500 mb-1 font-semibold">Types:</p>
+                      <p className="text-xs text-gray-500 mb-1 font-medium">Types:</p>
                       <div className="flex flex-wrap gap-1">
                         {category.types.map((type, idx) => (
-                          <span key={idx} className="text-[10px] sm:text-xs px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded">
+                          <span key={idx} className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded">
                             {type}
                           </span>
                         ))}
@@ -347,11 +373,11 @@ export default function CategoriesPage() {
 
                   {/* Category */}
                   {category.category && category.category.length > 0 && (
-                    <div className="mb-2">
-                      <p className="text-[10px] text-gray-500 mb-1 font-semibold">Category:</p>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1 font-medium">Category:</p>
                       <div className="flex flex-wrap gap-1">
                         {category.category.map((cat, idx) => (
-                          <span key={idx} className="text-[10px] sm:text-xs px-1.5 py-0.5 bg-green-50 text-green-700 rounded">
+                          <span key={idx} className="text-xs px-2 py-0.5 bg-green-50 text-green-700 rounded">
                             {cat}
                           </span>
                         ))}
@@ -361,20 +387,20 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <div className="flex sm:flex-col gap-2 sm:gap-1.5">
                   <button
                     onClick={() => handleEdit(category)}
-                    className="px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors font-medium flex items-center gap-1"
+                    className="flex-1 sm:flex-none px-3 py-1.5 text-xs bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white hover:from-purple-600 hover:to-fuchsia-600 rounded-xl font-semibold flex items-center justify-center gap-1.5 shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
                   >
-                    <Edit2 className="w-3 h-3" />
-                    Edit
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit</span>
                   </button>
                   <button
                     onClick={() => handleDelete(category.id)}
-                    className="px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors font-medium flex items-center gap-1"
+                    className="flex-1 sm:flex-none px-3 py-1.5 text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white hover:from-rose-600 hover:to-pink-600 rounded-xl font-semibold flex items-center justify-center gap-1.5 shadow-lg hover:shadow-rose-500/50 transition-all duration-300"
                   >
-                    <Trash2 className="w-3 h-3" />
-                    Delete
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
                   </button>
                 </div>
               </div>
@@ -386,14 +412,14 @@ export default function CategoriesPage() {
       {showModal && (
         <>
           <div
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             onClick={() => setShowModal(false)}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full my-4 border border-[#E2E8F0] max-h-[95vh] flex flex-col">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-purple-500/20 max-w-2xl w-full my-4 border border-purple-100 max-h-[95vh] flex flex-col">
               {/* Header */}
-              <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200 flex-shrink-0">
-                <h2 className="text-lg sm:text-xl font-bold text-[#0F172A]">
+              <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-purple-100 flex-shrink-0">
+                <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
                   {editingCategory ? 'Edit Category' : 'Add Category'}
                 </h2>
               </div>
@@ -416,7 +442,7 @@ export default function CategoriesPage() {
                         });
                       }}
                       placeholder="e.g., Fish Tanks"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-sm border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
                     />
                     {editingCategory && (
                       <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
@@ -566,19 +592,19 @@ export default function CategoriesPage() {
               </div>
 
               {/* Footer Buttons */}
-              <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-gray-200 flex-shrink-0">
+              <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-purple-100 flex-shrink-0">
                 <div className="flex gap-2 sm:gap-3">
                   <Button
                     onClick={() => setShowModal(false)}
                     variant="outline"
-                    className="flex-1 text-xs sm:text-sm py-2"
+                    className="flex-1 text-xs sm:text-sm py-2 border-purple-200 text-gray-700 hover:bg-purple-50 rounded-xl font-semibold transition-all duration-300"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleSave}
                     disabled={uploading}
-                    className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm py-2"
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white text-xs sm:text-sm py-2 rounded-xl font-semibold shadow-lg transition-all duration-300"
                   >
                     {uploading ? 'Uploading...' : 'Save'}
                   </Button>

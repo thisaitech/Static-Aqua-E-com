@@ -33,33 +33,33 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
+    description: '',
     category_id: '',
     type: '',
     product_category: '',
     image_url: '',
-    
+
     // Pricing
-    contact_for_price: false,
     price: '',
     mrp: '',
     discount_percent: '',
-    
+
     // Badges
     is_new: false,
     is_best_seller: false,
-    
+
     // Stock
     stock_status: 'in_stock',
     quantity: '',
-    
+
     // Rating
     rating: '4.0',
     rating_count: '0',
-    
+
     // Display
     show_in_category: true,
     is_featured: false,
-    
+
     // Status
     is_active: true
   })
@@ -85,6 +85,21 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     }
   }, [formData.name])
 
+  // Auto-calculate selling price based on MRP and discount
+  useEffect(() => {
+    const mrp = parseFloat(formData.mrp)
+    const discount = parseFloat(formData.discount_percent)
+
+    if (mrp && discount && discount > 0) {
+      const sellingPrice = mrp * (1 - discount / 100)
+      const roundedPrice = Math.round(sellingPrice) // Round to whole number
+      setFormData(prev => ({ ...prev, price: roundedPrice.toString() }))
+    } else if (mrp && !discount) {
+      // If no discount, selling price = MRP
+      setFormData(prev => ({ ...prev, price: Math.round(mrp).toString() }))
+    }
+  }, [formData.mrp, formData.discount_percent])
+
   const fetchProductData = async () => {
     try {
       setLoading(true)
@@ -101,28 +116,28 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
         setFormData({
           name: data.name || '',
           slug: data.slug || '',
+          description: data.description || '',
           category_id: data.category || '',
           type: data.type || '',
           product_category: data.product_category || '',
           image_url: data.image_url || '',
-          
-          contact_for_price: data.contact_for_price || false,
+
           price: data.price ? data.price.toString() : '',
           mrp: data.mrp ? data.mrp.toString() : '',
           discount_percent: data.discount_percent ? data.discount_percent.toString() : '',
-          
+
           is_new: data.is_new || false,
           is_best_seller: data.is_best_seller || false,
-          
+
           stock_status: data.stock_status || 'in_stock',
           quantity: data.quantity ? data.quantity.toString() : '',
-          
+
           rating: data.rating ? data.rating.toString() : '4.0',
           rating_count: data.rating_count ? data.rating_count.toString() : '0',
-          
+
           show_in_category: data.show_in_category !== false,
           is_featured: data.is_featured || false,
-          
+
           is_active: data.is_active !== false
         })
 
@@ -233,8 +248,8 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       alert('Please upload a product image')
       return
     }
-    if (!formData.contact_for_price && !formData.price) {
-      alert('Please enter price or enable "Contact for Price"')
+    if (!formData.price) {
+      alert('Please enter price')
       return
     }
 
@@ -243,26 +258,25 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       const productData = {
         name: formData.name,
         slug: formData.slug,
+        description: formData.description || null,
         category: formData.category_id,
         type: formData.type || null,
         product_category: formData.product_category || null,
         image_url: formData.image_url,
-        
-        contact_for_price: formData.contact_for_price,
-        original_price: formData.contact_for_price ? 0 : parseFloat(formData.price) || 0,
-        price: formData.contact_for_price ? null : parseFloat(formData.price) || null,
+
+        price: parseFloat(formData.price) || null,
         mrp: formData.mrp ? parseFloat(formData.mrp) : null,
         discount_percent: formData.discount_percent ? parseInt(formData.discount_percent) : 0,
-        
+
         is_new: formData.is_new,
         is_best_seller: formData.is_best_seller,
-        
+
         stock_status: formData.stock_status,
         quantity: formData.quantity ? parseInt(formData.quantity) : 0,
-        
+
         rating: parseFloat(formData.rating) || 4.0,
         rating_count: parseInt(formData.rating_count) || 0,
-        
+
         show_in_category: formData.show_in_category,
         is_featured: formData.is_featured,
         is_active: formData.is_active
@@ -333,16 +347,18 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               />
             </div>
 
+            {/* Slug field hidden - auto-generated from product name */}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Slug (URL)
+                Description
               </label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="Auto-generated from name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] bg-gray-50"
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Enter product description..."
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
               />
             </div>
 
@@ -448,23 +464,9 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
         <div>
           <h2 className="text-lg font-semibold text-[#0F172A] mb-4">Pricing</h2>
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="contact_for_price"
-                checked={formData.contact_for_price}
-                onChange={(e) => setFormData({ ...formData, contact_for_price: e.target.checked })}
-                className="w-4 h-4 text-[#2563EB] rounded focus:ring-[#2563EB]"
-              />
-              <label htmlFor="contact_for_price" className="text-sm font-medium text-gray-700">
-                Contact for Price (hide price on user side)
-              </label>
-            </div>
-
-            {!formData.contact_for_price && (
-              <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-[10px] sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     Selling Price (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -472,12 +474,12 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="999"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                    className="w-full px-2 py-2 sm:px-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-[10px] sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     MRP (₹)
                   </label>
                   <input
@@ -485,12 +487,12 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                     value={formData.mrp}
                     onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
                     placeholder="1299"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                    className="w-full px-2 py-2 sm:px-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-[10px] sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     Discount (%)
                   </label>
                   <input
@@ -498,11 +500,10 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                     value={formData.discount_percent}
                     onChange={(e) => setFormData({ ...formData, discount_percent: e.target.value })}
                     placeholder="23"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                    className="w-full px-2 py-2 sm:px-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                   />
                 </div>
               </div>
-            )}
           </div>
         </div>
 

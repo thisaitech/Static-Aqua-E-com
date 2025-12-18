@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { Input } from '@/components/ui/Input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/Button'
 
 interface LoginFormProps {
@@ -55,9 +56,8 @@ export default function LoginForm({ onClose }: LoginFormProps) {
           <label htmlFor="password" className="block text-sm font-medium mb-2">
             Password
           </label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

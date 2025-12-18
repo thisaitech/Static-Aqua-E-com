@@ -50,6 +50,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#3b82f6" />
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </head>
       <body className="antialiased">
         <AuthProvider>

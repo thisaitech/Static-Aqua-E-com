@@ -116,16 +116,13 @@ export function HeroCarousel() {
           className="absolute inset-0"
         >
           {/* Background Image */}
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
           />
-          
-          {/* Gradient Overlay */}
-          <div className={cn(
-            'absolute inset-0 bg-gradient-to-r',
-            slides[currentSlide].bgColor
-          )} />
+
+          {/* Dark gradient at bottom for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
           {/* Content */}
           <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">

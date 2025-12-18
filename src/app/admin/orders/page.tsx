@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Package, 
-  User, 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  Package,
+  User,
+  MapPin,
+  Phone,
+  Mail,
   Calendar,
   DollarSign,
   Truck,
@@ -15,10 +15,12 @@ import {
   Clock,
   RefreshCw,
   Eye,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatPrice } from '@/lib/utils';
+import { downloadInvoicePDF } from '@/lib/invoicePDF';
 
 interface OrderProduct {
   id: string;
@@ -77,7 +79,6 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -86,39 +87,74 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
+      console.log('Admin page: Fetching orders from API...');
       const response = await fetch('/api/orders');
+
+      console.log('Admin page: API response status:', response.status);
       const data = await response.json();
-      
+      console.log('Admin page: API response data:', data);
+
+      if (data.error) {
+        console.error('Admin page: API returned error:', data.error);
+        alert(`Error: ${data.error}. Please check console for details.`);
+        return;
+      }
+
       if (data.orders) {
+        console.log(`Admin page: Received ${data.orders.length} orders`);
+        console.log('Admin page: isAdmin =', data.isAdmin);
         setOrders(data.orders);
+      } else {
+        console.warn('Admin page: No orders in response');
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
+      alert('Failed to fetch orders. Please check console for details.');
     } finally {
       setLoading(false);
     }
   };
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const generateInvoice = (order: Order) => {
     try {
-      setUpdatingStatus(orderId);
-      const response = await fetch(`/api/orders/${orderId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_status: newStatus }),
-      });
+      // Generate a simple invoice number
+      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+      const invoiceDate = new Date().toISOString();
 
-      if (!response.ok) throw new Error('Failed to update order');
+      // Prepare invoice data for PDF generation
+      const invoiceData_PDF = {
+        invoice_number: invoiceNumber,
+        invoice_date: invoiceDate,
+        customer_name: order.customer_name,
+        customer_email: order.customer_email,
+        customer_phone: order.customer_phone,
+        customer_address: order.shipping_address,
+        customer_city: order.shipping_city,
+        customer_district: order.shipping_state,
+        customer_pincode: order.shipping_pincode,
+        items: order.products.map(product => ({
+          name: product.name,
+          quantity: product.quantity,
+          price: product.price,
+          total: product.price * product.quantity
+        })),
+        subtotal: order.subtotal,
+        shipping_cost: order.shipping_charge,
+        tax_amount: 0,
+        total_amount: order.total_amount,
+        payment_method: order.payment_method,
+        payment_status: order.payment_status
+      };
 
-      await fetchOrders();
-      setSelectedOrder(null);
+      // Download the invoice PDF immediately
+      downloadInvoicePDF(invoiceData_PDF);
+      alert(`Invoice ${invoiceNumber} downloaded successfully!`);
     } catch (error) {
-      console.error('Error updating order:', error);
-      alert('Failed to update order status');
-    } finally {
-      setUpdatingStatus(null);
+      console.error('Error generating invoice:', error);
+      alert(`Failed to generate invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -143,7 +179,7 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">Orders Management</h1>
           <p className="text-sm text-gray-600 mt-1">
             Total Orders: {orders.length}
           </p>
@@ -151,7 +187,7 @@ export default function OrdersPage() {
         <Button
           onClick={fetchOrders}
           variant="outline"
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto border-purple-200 text-gray-700 hover:bg-purple-50 rounded-xl font-semibold transition-all duration-300"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
@@ -160,21 +196,21 @@ export default function OrdersPage() {
 
       {/* Orders Grid */}
       {orders.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-300">
-          <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Orders Yet</h3>
+        <div className="text-center py-16 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg">
+          <Package className="w-16 h-16 mx-auto text-purple-400 mb-4" />
+          <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent mb-2">No Orders Yet</h3>
           <p className="text-gray-600">Orders will appear here once customers place them.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {orders.map((order) => {
-            const StatusIcon = statusIcons[order.order_status];
+            const StatusIcon = statusIcons[order.order_status] || Clock;
             return (
               <motion.div
                 key={order.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:border-primary transition-colors"
+                className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 overflow-hidden hover:shadow-2xl hover:shadow-purple-200/50 hover:scale-105 transition-all duration-300"
               >
                 {/* Order Header */}
                 <div className="p-4 bg-gray-50 border-b border-gray-200">
@@ -275,36 +311,6 @@ export default function OrdersPage() {
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Order Status Update */}
-              <div className="bg-gray-50 rounded-xl p-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Update Order Status
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {(['placed', 'packed', 'shipped', 'delivered'] as const).map((status) => {
-                    const StatusIcon = statusIcons[status];
-                    return (
-                      <Button
-                        key={status}
-                        onClick={() => updateOrderStatus(selectedOrder.id, status)}
-                        disabled={updatingStatus === selectedOrder.id}
-                        variant={selectedOrder.order_status === status ? 'primary' : 'outline'}
-                        className="flex-1 min-w-[120px]"
-                      >
-                        {updatingStatus === selectedOrder.id ? (
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <StatusIcon className="w-4 h-4 mr-1" />
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </>
-                        )}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Customer Information */}
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
@@ -410,6 +416,27 @@ export default function OrdersPage() {
                       <span className="font-mono text-xs">{selectedOrder.razorpay_order_id}</span>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Invoice PDF Download */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-primary" />
+                  Invoice
+                </h3>
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Download a professional invoice PDF for this order
+                  </p>
+                  <Button
+                    variant="primary"
+                    onClick={() => generateInvoice(selectedOrder)}
+                    className="w-full"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Download Invoice PDF
+                  </Button>
                 </div>
               </div>
             </div>

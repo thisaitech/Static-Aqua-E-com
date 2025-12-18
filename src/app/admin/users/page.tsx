@@ -72,20 +72,20 @@ export default function UsersPage() {
     <div className="p-2 sm:p-6">
       {/* Header */}
       <div className="mb-3 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#0F172A]">Users</h1>
-        <p className="text-xs sm:text-sm text-[#64748B]">Manage registered users</p>
+        <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">Users</h1>
+        <p className="text-xs sm:text-sm text-gray-600">Manage registered users</p>
       </div>
 
       {/* Stats */}
       <div className="mb-3 sm:mb-6">
-        <div className="bg-white rounded-lg sm:rounded-xl border border-[#E2E8F0] p-3 sm:p-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg p-3 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs sm:text-sm text-[#64748B]">Total Users</p>
-              <p className="text-xl sm:text-2xl font-bold text-[#0F172A] mt-0.5 sm:mt-1">{users.length}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Total Users</p>
+              <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent mt-0.5 sm:mt-1">{users.length}</p>
             </div>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-100 to-fuchsia-100 rounded-2xl flex items-center justify-center shadow-lg">
+              <User className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             </div>
           </div>
         </div>
@@ -93,19 +93,19 @@ export default function UsersPage() {
 
       {/* Users Cards */}
       {users.length === 0 ? (
-        <div className="bg-white rounded-lg sm:rounded-xl border border-[#E2E8F0] p-8 text-center">
-          <p className="text-gray-500">No users found</p>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg p-8 text-center">
+          <p className="text-gray-600">No users found</p>
         </div>
       ) : (
         <div className="space-y-2 sm:space-y-3">
           {users.map((user) => (
             <div
               key={user.id}
-              className="bg-white rounded-xl border-2 border-blue-100 p-3 sm:p-4 hover:border-blue-400 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+              className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 p-3 sm:p-4 hover:shadow-2xl hover:shadow-purple-200/50 hover:scale-105 transition-all duration-300 cursor-pointer"
             >
               <div className="flex items-center gap-3 sm:gap-4">
                 {/* Avatar */}
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200 shadow-md">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                   <span className="text-white font-bold text-lg sm:text-xl">
                     {user.full_name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
                   </span>
@@ -122,10 +122,10 @@ export default function UsersPage() {
 
                   {/* Email */}
                   <div className="flex items-center gap-1.5 mb-1">
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <p className="text-xs sm:text-sm text-blue-600 font-medium truncate">
+                    <p className="text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent font-semibold truncate">
                       {user.email}
                     </p>
                   </div>

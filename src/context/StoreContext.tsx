@@ -1,7 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import { createClient as createSupabaseClient } from '@/lib/supabase/client';
 import { Product } from '@/data/products';
+import { useAuth } from '@/context/AuthContext';
 
 // Types
 interface CartItem {
@@ -97,7 +99,7 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
     case 'LOGIN':
       return { ...state, user: action.payload, isAuthModalOpen: false };
     case 'LOGOUT':
-      return { ...state, user: null };
+      return { ...state, user: null, cart: [], wishlist: [] };
     case 'TOGGLE_AUTH_MODAL':
       return { ...state, isAuthModalOpen: !state.isAuthModalOpen };
     case 'TOGGLE_CART':
@@ -128,52 +130,188 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 // Provider
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(storeReducer, initialState);
+  const { user: authUser } = useAuth(); // Get user from AuthContext
+  const isLoggingOutRef = React.useRef(false); // Track logout state
+  const hasLoadedDataRef = React.useRef(false); // Track if we've loaded data from Supabase
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('rainbow-aqua-cart');
-    const savedWishlist = localStorage.getItem('rainbow-aqua-wishlist');
-    const savedUser = localStorage.getItem('rainbow-aqua-user');
+  // Function to fetch cart from Supabase (defined before useEffect)
+  const fetchCartFromSupabase = React.useCallback(async (userId: string) => {
+    console.log('StoreContext - Fetching cart from Supabase for user:', userId);
+    const supabase = createSupabaseClient();
+    const { data, error } = await supabase
+      .from('cart_items')
+      .select('cart_data')
+      .eq('user_id', userId)
+      .single();
 
-    if (savedCart) {
-      try {
-        dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
-      } catch (e) {
-        console.error('Failed to load cart', e);
-      }
-    }
-    if (savedWishlist) {
-      try {
-        dispatch({ type: 'SET_WISHLIST', payload: JSON.parse(savedWishlist) });
-      } catch (e) {
-        console.error('Failed to load wishlist', e);
-      }
-    }
-    if (savedUser) {
-      try {
-        dispatch({ type: 'LOGIN', payload: JSON.parse(savedUser) });
-      } catch (e) {
-        console.error('Failed to load user', e);
-      }
+    if (data && data.cart_data) {
+      console.log('StoreContext - Cart loaded from Supabase:', data.cart_data);
+      dispatch({ type: 'LOAD_CART', payload: data.cart_data });
+      hasLoadedDataRef.current = true; // Mark that we've loaded data
+    } else if (error && error.code === 'PGRST116') {
+      // No cart found in Supabase - start with empty cart
+      console.log('StoreContext - No cart found in Supabase, starting with empty cart');
+      dispatch({ type: 'LOAD_CART', payload: [] });
+      hasLoadedDataRef.current = true; // Mark that we've loaded (even if empty)
+    } else if (error) {
+      console.error('Failed to fetch cart from Supabase', error);
+      dispatch({ type: 'LOAD_CART', payload: [] });
+      hasLoadedDataRef.current = true; // Mark that we've loaded (even if error)
     }
   }, []);
 
-  // Save to localStorage on change
-  useEffect(() => {
-    localStorage.setItem('rainbow-aqua-cart', JSON.stringify(state.cart));
-  }, [state.cart]);
+  // Function to fetch wishlist from Supabase (defined before useEffect)
+  const fetchWishlistFromSupabase = React.useCallback(async (userId: string) => {
+    console.log('StoreContext - Fetching wishlist from Supabase for user:', userId);
+    const supabase = createSupabaseClient();
+    const { data, error } = await supabase
+      .from('wishlists')
+      .select('product_ids')
+      .eq('user_id', userId)
+      .single();
 
-  useEffect(() => {
-    localStorage.setItem('rainbow-aqua-wishlist', JSON.stringify(state.wishlist));
-  }, [state.wishlist]);
-
-  useEffect(() => {
-    if (state.user) {
-      localStorage.setItem('rainbow-aqua-user', JSON.stringify(state.user));
-    } else {
-      localStorage.removeItem('rainbow-aqua-user');
+    if (data && data.product_ids) {
+      console.log('StoreContext - Wishlist loaded from Supabase:', data.product_ids);
+      dispatch({ type: 'SET_WISHLIST', payload: data.product_ids });
+      hasLoadedDataRef.current = true; // Mark that we've loaded data
+    } else if (error && error.code === 'PGRST116') {
+      // No wishlist found in Supabase - start with empty wishlist
+      console.log('StoreContext - No wishlist found in Supabase, starting with empty wishlist');
+      dispatch({ type: 'SET_WISHLIST', payload: [] });
+      hasLoadedDataRef.current = true; // Mark that we've loaded (even if empty)
+    } else if (error) {
+      console.error('Failed to fetch wishlist from Supabase', error);
+      dispatch({ type: 'SET_WISHLIST', payload: [] });
+      hasLoadedDataRef.current = true; // Mark that we've loaded (even if error)
     }
-  }, [state.user]);
+  }, []);
+
+  // Sync AuthContext user to StoreContext
+  useEffect(() => {
+    if (authUser) {
+    
+      // Reset logout flag BEFORE dispatching LOGIN to ensure syncs work
+      isLoggingOutRef.current = false;
+      const storeUser = {
+        id: authUser.id,
+        email: authUser.email || '',
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+      };
+      dispatch({ type: 'LOGIN', payload: storeUser });
+      // Immediately fetch cart and wishlist from Supabase when user syncs
+      fetchCartFromSupabase(authUser.id);
+      fetchWishlistFromSupabase(authUser.id);
+    } else if (!authUser) {
+      console.log('StoreContext - User logged out in AuthContext');
+      // Set logout flag FIRST to prevent saving empty arrays
+      isLoggingOutRef.current = true;
+      hasLoadedDataRef.current = false; // Reset loaded flag
+      // Dispatch logout which clears cart/wishlist
+      dispatch({ type: 'LOGOUT' });
+      // Keep the flag set for a moment to prevent any sync attempts
+      setTimeout(() => {
+        console.log('StoreContext - Logout complete, resetting flag');
+        isLoggingOutRef.current = false;
+      }, 100);
+    }
+  }, [authUser, fetchCartFromSupabase, fetchWishlistFromSupabase]);
+
+  // Cart and wishlist are fetched via the AuthContext sync effect above
+  // No need for additional fetch logic here
+
+  // Save cart to Supabase whenever it changes
+  useEffect(() => {
+    const syncCartToSupabase = async () => {
+      // Skip syncing during logout
+      if (isLoggingOutRef.current) {
+        console.log('StoreContext - Skipping cart sync during logout');
+        return;
+      }
+
+      // Skip syncing until we've loaded initial data from Supabase
+      if (!hasLoadedDataRef.current) {
+        console.log('StoreContext - Skipping cart sync - waiting for initial data load');
+        return;
+      }
+
+      if (state.user && state.user.id) {
+        console.log('StoreContext - Syncing cart to Supabase:', {
+          userId: state.user.id,
+          cartItemsCount: state.cart.length
+        });
+        const supabase = createSupabaseClient();
+        const { data, error } = await supabase.from('cart_items').upsert({
+          user_id: state.user.id,
+          cart_data: state.cart,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        }).select();
+
+        if (error) {
+          console.error('Failed to sync cart to Supabase:', error);
+          console.error('Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+        } else {
+          console.log('StoreContext - Cart synced to Supabase successfully:', data);
+        }
+      }
+    };
+    syncCartToSupabase();
+  }, [state.cart, state.user]);
+
+
+  // Save wishlist to Supabase whenever it changes
+  useEffect(() => {
+    const syncWishlistToSupabase = async () => {
+      // Skip syncing during logout
+      if (isLoggingOutRef.current) {
+        console.log('StoreContext - Skipping wishlist sync during logout');
+        return;
+      }
+
+      // Skip syncing until we've loaded initial data from Supabase
+      if (!hasLoadedDataRef.current) {
+        console.log('StoreContext - Skipping wishlist sync - waiting for initial data load');
+        return;
+      }
+
+      if (state.user && state.user.id) {
+        console.log('StoreContext - Syncing wishlist to Supabase:', {
+          userId: state.user.id,
+          wishlist: state.wishlist,
+          wishlistLength: state.wishlist.length
+        });
+        const supabase = createSupabaseClient();
+        const { data, error } = await supabase.from('wishlists').upsert({
+          user_id: state.user.id,
+          product_ids: state.wishlist,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        }).select();
+
+        if (error) {
+          console.error('Failed to sync wishlist to Supabase:', error);
+          console.error('Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+        } else {
+          console.log('StoreContext - Wishlist synced to Supabase successfully:', data);
+        }
+      }
+    };
+    syncWishlistToSupabase();
+  }, [state.wishlist, state.user]);
+
+  // User state is managed by AuthContext - no need for localStorage here
 
   const addToCart = (product: Product) => {
     dispatch({ type: 'ADD_TO_CART', payload: product });
@@ -192,7 +330,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleWishlist = (id: string) => {
+    console.log('StoreContext - toggleWishlist called:', {
+      productId: id,
+      currentWishlist: state.wishlist,
+      isCurrentlyInWishlist: state.wishlist.includes(id),
+      userId: state.user?.id
+    });
     dispatch({ type: 'TOGGLE_WISHLIST', payload: id });
+    // Log after dispatch to see the result
+    setTimeout(() => {
+      console.log('StoreContext - Wishlist after toggle dispatch:', state.wishlist);
+    }, 0);
   };
 
   const isInWishlist = (id: string) => state.wishlist.includes(id);

@@ -263,6 +263,12 @@ export default function OrderSuccessPage() {
           transition={{ delay: 0.7 }}
           className="flex flex-col sm:flex-row gap-4"
         >
+          <Link href="/orders" className="flex-1">
+            <Button className="w-full">
+              <FileText className="w-4 h-4 mr-2" />
+              View All Orders
+            </Button>
+          </Link>
           <Link href="/" className="flex-1">
             <Button variant="outline" className="w-full">
               <ShoppingBag className="w-4 h-4 mr-2" />
@@ -280,7 +286,7 @@ export default function OrderSuccessPage() {
         >
           Questions? Contact us on{' '}
           <a 
-            href="https://wa.me/919876543210" 
+            href="https://wa.me/9188707 77420" 
             className="text-green-600 font-medium hover:underline"
             target="_blank"
             rel="noopener noreferrer"
@@ -288,7 +294,7 @@ export default function OrderSuccessPage() {
             WhatsApp
           </a>
         </motion.p>
-      </motion.div>
+      </div>
     </div>
   );
 }

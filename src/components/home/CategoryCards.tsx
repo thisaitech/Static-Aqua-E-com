@@ -171,6 +171,10 @@ export function CategoryCards() {
     );
   }
 
+  // Show only first 8 categories
+  const displayedCategories = categories.slice(0, 8);
+  const hasMoreCategories = categories.length > 8;
+
   return (
     <section className="py-8 bg-white dark:bg-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -182,20 +186,23 @@ export function CategoryCards() {
             </h2>
             <div className="hidden sm:block w-24 h-1 bg-gradient-to-r from-primary-500 to-primary-300 rounded-full" />
           </div>
-          <Link
-            href="/categories"
-            className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1"
-          >
-            View All
-            <span className="text-lg">→</span>
-          </Link>
+          {/* Only show View All button if there are more than 8 categories */}
+          {hasMoreCategories && (
+            <Link
+              href="/categories"
+              className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1"
+            >
+              View All
+              <span className="text-lg">→</span>
+            </Link>
+          )}
         </div>
 
         {/* Categories Horizontal Scroll */}
         <div className="relative">
           <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
             <div className="flex gap-4 min-w-max">
-              {categories.map((category, index) => {
+              {displayedCategories.map((category, index) => {
                 const iconKey = category.slug || category.name.toLowerCase().replace(/\s+/g, '-').replace(/[&]/g, '');
                 const iconConfig = categoryIcons[iconKey];
                 const fallbackImage = categoryImageUrls[iconKey];

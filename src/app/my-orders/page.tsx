@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { 
-  Package, 
+import {
+  Package,
   Calendar,
   DollarSign,
   Truck,
@@ -14,7 +14,9 @@ import {
   ShoppingBag,
   ArrowLeft,
   X,
-  Eye
+  Eye,
+  Download,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatPrice } from '@/lib/utils';
@@ -93,7 +95,7 @@ export default function MyOrdersPage() {
       setLoading(true);
       const response = await fetch('/api/orders');
       const data = await response.json();
-      
+
       if (data.orders) {
         setOrders(data.orders);
       }
@@ -101,6 +103,24 @@ export default function MyOrdersPage() {
       console.error('Error fetching orders:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    try {
+      // Open invoice in new window and auto-trigger print dialog
+      const url = `/api/invoices/${orderId}/pdf`;
+      const printWindow = window.open(url, '_blank');
+
+      // Wait for the page to load, then trigger print
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+    } catch (error) {
+      console.error('Error opening invoice:', error);
+      alert('Failed to open invoice. Please try again.');
     }
   };
 
@@ -247,14 +267,29 @@ export default function MyOrdersPage() {
                           </span>
                         </div>
                       </div>
-                      <Button
-                        onClick={() => setSelectedOrder(order)}
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Details
-                      </Button>
+                      <div className="flex gap-2 flex-col sm:flex-row">
+                        <Button
+                          onClick={() => setSelectedOrder(order)}
+                          variant="outline"
+                          className="w-full sm:w-auto"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View Details
+                        </Button>
+                        {order.payment_status === 'completed' && (
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadInvoice(order.id);
+                            }}
+                            variant="outline"
+                            className="w-full sm:w-auto border-primary-600 text-primary-600 hover:bg-primary-50"
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Invoice
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -386,6 +421,19 @@ export default function MyOrdersPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Download Invoice Button */}
+                {selectedOrder.payment_status === 'completed' && (
+                  <div className="pt-4">
+                    <Button
+                      onClick={() => handleDownloadInvoice(selectedOrder.id)}
+                      className="w-full bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-5 h-5" />
+                      Download Invoice
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

@@ -308,32 +308,6 @@ export default function FAQPage() {
             ))
           )}
         </div>
-
-        {/* Contact Support Section */}
-        <div className="mt-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 sm:p-8 text-white">
-          <div className="text-center max-w-2xl mx-auto">
-            <Phone className="w-12 h-12 mx-auto mb-4" />
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">Still have questions?</h2>
-            <p className="text-white/90 mb-6">
-              Our customer support team is available 24/7 to help you with any queries.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                href="tel:+919876543210"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-primary-600 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
-              >
-                <Phone className="w-5 h-5" />
-                Call Us
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 text-white border-2 border-white/20 rounded-lg font-semibold hover:bg-white/20 transition-colors"
-              >
-                Contact Support
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

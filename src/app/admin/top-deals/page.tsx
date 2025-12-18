@@ -25,34 +25,12 @@ interface TopDeal {
   image_url: string;
   category_slug: string | null;
   custom_link: string | null;
-  icon_name: string;
-  bg_color: string;
+  icon_name?: string;
+  bg_color?: string;
   is_active: boolean;
   display_order: number;
   created_at: string;
 }
-
-const iconOptions = [
-  { value: 'fish', label: 'Fish 🐟' },
-  { value: 'bird', label: 'Bird 🦜' },
-  { value: 'leaf', label: 'Plant 🌿' },
-  { value: 'zap', label: 'Lightning ⚡' },
-  { value: 'package', label: 'Package 📦' },
-  { value: 'gift', label: 'Gift 🎁' },
-  { value: 'star', label: 'Star ⭐' },
-  { value: 'heart', label: 'Heart ❤️' },
-];
-
-const gradientOptions = [
-  { value: 'from-blue-600 to-blue-700', label: 'Blue', preview: 'bg-gradient-to-r from-blue-600 to-blue-700' },
-  { value: 'from-green-600 to-green-700', label: 'Green', preview: 'bg-gradient-to-r from-green-600 to-green-700' },
-  { value: 'from-purple-600 to-purple-700', label: 'Purple', preview: 'bg-gradient-to-r from-purple-600 to-purple-700' },
-  { value: 'from-orange-500 to-orange-600', label: 'Orange', preview: 'bg-gradient-to-r from-orange-500 to-orange-600' },
-  { value: 'from-red-600 to-red-700', label: 'Red', preview: 'bg-gradient-to-r from-red-600 to-red-700' },
-  { value: 'from-pink-600 to-pink-700', label: 'Pink', preview: 'bg-gradient-to-r from-pink-600 to-pink-700' },
-  { value: 'from-teal-600 to-teal-700', label: 'Teal', preview: 'bg-gradient-to-r from-teal-600 to-teal-700' },
-  { value: 'from-indigo-600 to-indigo-700', label: 'Indigo', preview: 'bg-gradient-to-r from-indigo-600 to-indigo-700' },
-];
 
 export default function TopDealsPage() {
   const [deals, setDeals] = useState<TopDeal[]>([]);
@@ -67,8 +45,6 @@ export default function TopDealsPage() {
     image_url: '',
     category_slug: '',
     custom_link: '',
-    icon_name: 'package',
-    bg_color: 'from-blue-600 to-blue-700',
   });
 
   const supabase = createClient();
@@ -162,8 +138,6 @@ export default function TopDealsPage() {
             image_url: formData.image_url,
             category_slug: formData.category_slug || null,
             custom_link: formData.custom_link || null,
-            icon_name: formData.icon_name,
-            bg_color: formData.bg_color,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingDeal.id);
@@ -178,8 +152,6 @@ export default function TopDealsPage() {
             image_url: formData.image_url,
             category_slug: formData.category_slug || null,
             custom_link: formData.custom_link || null,
-            icon_name: formData.icon_name,
-            bg_color: formData.bg_color,
             is_active: true,
             display_order: deals.length + 1,
           });
@@ -196,8 +168,6 @@ export default function TopDealsPage() {
         image_url: '',
         category_slug: '',
         custom_link: '',
-        icon_name: 'package',
-        bg_color: 'from-blue-600 to-blue-700',
       });
     } catch (error: any) {
       console.error('Error saving deal:', error);
@@ -213,8 +183,6 @@ export default function TopDealsPage() {
       image_url: deal.image_url || '',
       category_slug: deal.category_slug || '',
       custom_link: deal.custom_link || '',
-      icon_name: deal.icon_name,
-      bg_color: deal.bg_color,
     });
     setShowModal(true);
   };
@@ -266,11 +234,11 @@ export default function TopDealsPage() {
         <div className="flex items-center gap-3">
           <Flame className="w-8 h-8 text-orange-500" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Top Deals</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">Top Deals</h1>
             <p className="text-sm text-gray-600">Manage featured deals on homepage</p>
           </div>
         </div>
-        <Button onClick={() => setShowModal(true)}>
+        <Button onClick={() => setShowModal(true)} className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 rounded-xl font-semibold shadow-lg hover:shadow-purple-500/50 transition-all duration-300">
           <Plus className="w-4 h-4 mr-2" />
           Add Deal
         </Button>
@@ -278,11 +246,11 @@ export default function TopDealsPage() {
 
       {/* Deals Grid */}
       {deals.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-300">
-          <Flame className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Deals Yet</h3>
+        <div className="text-center py-16 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg">
+          <Flame className="w-16 h-16 mx-auto text-orange-400 mb-4" />
+          <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent mb-2">No Deals Yet</h3>
           <p className="text-gray-600 mb-4">Create your first top deal to display on the homepage.</p>
-          <Button onClick={() => setShowModal(true)}>
+          <Button onClick={() => setShowModal(true)} className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 rounded-xl font-semibold shadow-lg">
             <Plus className="w-4 h-4 mr-2" />
             Create First Deal
           </Button>
@@ -294,43 +262,29 @@ export default function TopDealsPage() {
               key={deal.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`bg-white rounded-xl border-2 overflow-hidden ${
-                deal.is_active ? 'border-gray-200' : 'border-gray-300 opacity-60'
+              className={`group bg-white/80 backdrop-blur-sm rounded-2xl border overflow-hidden hover:shadow-2xl hover:shadow-purple-200/50 hover:scale-105 transition-all duration-300 ${
+                deal.is_active ? 'border-purple-100/50' : 'border-slate-300 opacity-60'
               }`}
             >
               {/* Preview Card */}
-              <div className="relative aspect-[4/3] overflow-hidden">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
                 <img
                   src={deal.image_url}
                   alt={deal.title}
                   className="w-full h-full object-cover"
                 />
-                <div className={`absolute inset-0 bg-gradient-to-t ${deal.bg_color} opacity-90`} />
-                <div className="absolute inset-0 p-4 flex flex-col justify-between text-white">
-                  <div className="flex justify-end">
-                    <span className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center text-xs">
-                      {deal.icon_name === 'fish' && '🐟'}
-                      {deal.icon_name === 'bird' && '🦜'}
-                      {deal.icon_name === 'leaf' && '🌿'}
-                      {deal.icon_name === 'zap' && '⚡'}
-                      {deal.icon_name === 'package' && '📦'}
-                      {deal.icon_name === 'gift' && '🎁'}
-                      {deal.icon_name === 'star' && '⭐'}
-                      {deal.icon_name === 'heart' && '❤️'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="inline-block text-xs font-semibold bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded mb-2">
-                      {deal.discount}
-                    </span>
-                    <h3 className="font-bold text-sm">{deal.title}</h3>
-                  </div>
+                {/* Text overlay at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                  <span className="inline-block text-xs font-semibold bg-white/90 text-gray-900 px-2 py-1 rounded mb-2">
+                    {deal.discount}
+                  </span>
+                  <h3 className="font-bold text-sm text-white">{deal.title}</h3>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="p-4 space-y-2">
-                <div className="text-xs text-gray-600">
+              <div className="p-4 space-y-3">
+                <div className="text-xs text-gray-600 min-h-[2rem]">
                   {deal.category_slug ? (
                     <span>Links to: /category/{deal.category_slug}</span>
                   ) : deal.custom_link ? (
@@ -339,39 +293,41 @@ export default function TopDealsPage() {
                     <span className="text-gray-400">No link set</span>
                   )}
                 </div>
-                
-                <div className="flex gap-2">
+
+                <div className="grid grid-cols-3 gap-2">
                   <Button
                     onClick={() => toggleActive(deal)}
-                    variant={deal.is_active ? 'outline' : 'primary'}
-                    className="flex-1 text-sm"
+                    className={`w-full text-xs px-2 py-2 flex flex-col items-center gap-1 rounded-xl font-semibold shadow-lg transition-all duration-300 ${
+                      deal.is_active
+                        ? 'bg-gradient-to-r from-slate-300 to-slate-400 text-white hover:from-slate-400 hover:to-slate-500'
+                        : 'bg-gradient-to-r from-emerald-400 to-teal-400 text-white hover:from-emerald-500 hover:to-teal-500'
+                    }`}
                   >
                     {deal.is_active ? (
                       <>
-                        <EyeOff className="w-3 h-3 mr-1" />
-                        Hide
+                        <EyeOff className="w-4 h-4" />
+                        <span>Hide</span>
                       </>
                     ) : (
                       <>
-                        <Eye className="w-3 h-3 mr-1" />
-                        Show
+                        <Eye className="w-4 h-4" />
+                        <span>Show</span>
                       </>
                     )}
                   </Button>
                   <Button
                     onClick={() => handleEdit(deal)}
-                    variant="outline"
-                    className="flex-1 text-sm"
+                    className="w-full text-xs px-2 py-2 flex flex-col items-center gap-1 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white hover:from-purple-600 hover:to-fuchsia-600 rounded-xl font-semibold shadow-lg transition-all duration-300"
                   >
-                    <Edit2 className="w-3 h-3 mr-1" />
-                    Edit
+                    <Edit2 className="w-4 h-4" />
+                    <span>Edit</span>
                   </Button>
                   <Button
                     onClick={() => handleDelete(deal.id)}
-                    variant="outline"
-                    className="text-red-600 hover:bg-red-50 text-sm"
+                    className="w-full text-xs px-2 py-2 flex flex-col items-center gap-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white hover:from-rose-600 hover:to-pink-600 rounded-xl font-semibold shadow-lg transition-all duration-300"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
                   </Button>
                 </div>
               </div>
@@ -441,14 +397,11 @@ export default function TopDealsPage() {
                 </label>
                 {formData.image_url ? (
                   <div className="space-y-2">
-                    <div className="relative">
-                      <img
-                        src={formData.image_url}
-                        alt="Preview"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <div className={`absolute inset-0 bg-gradient-to-t ${formData.bg_color} opacity-50 rounded-lg`} />
-                    </div>
+                    <img
+                      src={formData.image_url}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
                     <button
                       onClick={() => setFormData({ ...formData, image_url: '' })}
                       className="text-red-600 text-sm hover:underline"
@@ -521,51 +474,6 @@ export default function TopDealsPage() {
                 />
               </div>
 
-              {/* Icon */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Icon
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {iconOptions.map((icon) => (
-                    <button
-                      key={icon.value}
-                      onClick={() => setFormData({ ...formData, icon_name: icon.value })}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
-                        formData.icon_name === icon.value
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <span className="text-2xl">{icon.label.split(' ')[1]}</span>
-                      <p className="text-xs mt-1">{icon.label.split(' ')[0]}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Background Gradient */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Background Gradient
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {gradientOptions.map((gradient) => (
-                    <button
-                      key={gradient.value}
-                      onClick={() => setFormData({ ...formData, bg_color: gradient.value })}
-                      className={`p-2 border-2 rounded-lg overflow-hidden ${
-                        formData.bg_color === gradient.value
-                          ? 'border-gray-900'
-                          : 'border-gray-200'
-                      }`}
-                    >
-                      <div className={`h-12 rounded ${gradient.preview}`} />
-                      <p className="text-xs mt-1 text-center">{gradient.label}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Modal Footer */}

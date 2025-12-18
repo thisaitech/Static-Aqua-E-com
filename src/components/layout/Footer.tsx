@@ -115,14 +115,14 @@ export function Footer() {
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-slate-400">
-                  123 Anna Nagar, Chennai<br />
-                  Tamil Nadu - 600040
+                  No 11, B & C, Near By Palayamkottai Railway Station, Railway Feeder Road, Palayamkottai
+                  Tirunelveli-627002, Tamil Nadu
                 </span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-primary-500 flex-shrink-0" />
-                <a href="tel:+919876543210" className="text-sm text-slate-400 hover:text-primary-400">
-                  +91 98765 43210
+                <a href="tel:+918870777420" className="text-sm text-slate-400 hover:text-primary-400">
+                  +91 88707 77420
                 </a>
               </li>
               <li className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export function Footer() {
               <p className="text-xs text-slate-500">Get exclusive offers on the app</p>
             </div>
             <div className="flex items-center gap-4 text-xs text-slate-500">
-              <span>Languages: தமிழ் | English | മലയാളം | ಕನ್ನಡ</span>
+              <span>Languages:  English</span>
             </div>
           </div>
         </div>

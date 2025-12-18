@@ -153,14 +153,14 @@ export default function FilterTypesPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Filter Types Management</h1>
-          <p className="text-slate-600">Manage dynamic filter types for each category</p>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent mb-2">Filter Types Management</h1>
+          <p className="text-gray-600">Manage dynamic filter types for each category</p>
         </div>
 
         {/* Category Selection */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg p-4 mb-6">
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">Select Category:</span>
+            <span className="text-sm font-semibold text-gray-700">Select Category:</span>
             {categories.map((category) => (
               <button
                 key={category.slug}
@@ -168,10 +168,10 @@ export default function FilterTypesPage() {
                   setSelectedCategory(category.slug);
                   setFormData(prev => ({ ...prev, category_slug: category.slug }));
                 }}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg ${
                   selectedCategory === category.slug
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-purple-50 border border-purple-100'
                 }`}
               >
                 {category.name}
@@ -181,22 +181,22 @@ export default function FilterTypesPage() {
         </div>
 
         {/* Filter Types Section */}
-        <div className="bg-white rounded-xl border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg">
+          <div className="p-6 border-b border-purple-100">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                  <Filter className="w-5 h-5 text-blue-500" />
+                <h2 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-purple-500" />
                   Filter Types - {categories.find(c => c.slug === selectedCategory)?.name}
                 </h2>
-                <p className="text-sm text-slate-600">Manage filter options for this category</p>
+                <p className="text-sm text-gray-600">Manage filter options for this category</p>
               </div>
               <button
                 onClick={() => {
                   resetForm();
                   setShowModal(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white rounded-xl font-semibold shadow-lg transition-all duration-300"
               >
                 <Plus className="w-4 h-4" />
                 Add Filter Type

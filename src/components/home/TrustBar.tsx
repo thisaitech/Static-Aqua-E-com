@@ -1,24 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { 
-  Truck, 
-  Shield, 
-  Award, 
-  Clock, 
-  CreditCard, 
-  Headphones,
+import {
+  Truck,
+  Shield,
   RefreshCw,
   BadgeCheck,
-  Package,
-  Percent
+  Package
 } from 'lucide-react';
 
 const trustItems = [
   {
     icon: Truck,
     title: 'Free Delivery',
-    description: 'Orders above ₹2,000',
+    description: 'Orders above 1,000',
     color: 'text-blue-600',
     bg: 'bg-blue-50',
   },
@@ -37,9 +32,9 @@ const trustItems = [
     bg: 'bg-purple-50',
   },
   {
-    icon: RefreshCw,
-    title: 'Easy Returns',
-    description: '7-day policy',
+    icon: Shield,
+    title: 'Safe Delivery',
+    description: 'Across Tamil Nadu',
     color: 'text-orange-600',
     bg: 'bg-orange-50',
   },
@@ -78,33 +73,6 @@ export function TrustBar() {
   );
 }
 
-// Compact promo banner for under the hero
-export function PromoBanner() {
-  const promoItems = [
-    { icon: Truck, text: 'Free Shipping on ₹2000+' },
-    { icon: CreditCard, text: 'COD Available' },
-    { icon: Headphones, text: '24/7 Support' },
-    { icon: Percent, text: 'Daily Deals' },
-  ];
-
-  return (
-    <div className="bg-gradient-to-r from-primary-600 to-primary-500 py-2.5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center gap-4 sm:gap-8 text-white text-xs sm:text-sm font-medium overflow-x-auto whitespace-nowrap">
-          {promoItems.map((item, index) => (
-            <span key={index} className="flex items-center gap-1.5">
-              <item.icon className="w-4 h-4" />
-              {item.text}
-              {index < promoItems.length - 1 && (
-                <span className="hidden sm:inline text-white/50 ml-4">|</span>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // Newsletter section with icon
 export function NewsletterSection() {

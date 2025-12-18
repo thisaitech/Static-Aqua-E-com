@@ -13,11 +13,8 @@ interface Banner {
   badge_text: string;
   button_text: string;
   button_link: string;
-  desktop_image: string | null;
-  mobile_image: string | null;
   video_url: string | null;
   media_type: 'image' | 'video';
-  bg_color: string;
   is_active: boolean;
   display_order: number;
   created_at: string;
@@ -25,33 +22,26 @@ interface Banner {
 
 export default function BannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [categories, setCategories] = useState<Array<{ slug: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [showBannerModal, setShowBannerModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [uploading, setUploading] = useState(false);
-  
+
   const [bannerFormData, setBannerFormData] = useState({
     title: '',
     subtitle: '',
     badge_text: '',
     button_text: 'Shop Now',
     button_link: '/',
-    desktop_image: '',
-    mobile_image: '',
-    bg_color: 'from-blue-900/95 via-blue-800/90 to-blue-900/80',
+    video_url: '',
+    media_type: 'video',
     is_active: true
   });
 
   const supabase = createClient();
 
-  const bgColorOptions = [
-    'from-blue-900/95 via-blue-800/90 to-blue-900/80',
-    'from-emerald-900/95 via-emerald-800/90 to-emerald-900/80',
-    'from-purple-900/95 via-purple-800/90 to-purple-900/80',
-    'from-orange-900/95 via-orange-800/90 to-orange-900/80',
-    'from-red-900/95 via-red-800/90 to-red-900/80',
-    'from-teal-900/95 via-teal-800/90 to-teal-900/80'
-  ];
+
 
   useEffect(() => {
     fetchData();
@@ -60,7 +50,7 @@ export default function BannersPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch banners
       const { data: bannersData, error: bannersError } = await supabase
         .from('hero_banners')
@@ -70,6 +60,17 @@ export default function BannersPage() {
       if (bannersError) throw bannersError;
 
       setBanners(bannersData || []);
+
+      // Fetch categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('slug, name')
+        .eq('is_active', true)
+        .order('name');
+
+      if (categoriesError) throw categoriesError;
+
+      setCategories(categoriesData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -111,7 +112,7 @@ export default function BannersPage() {
   const handleVideoUpload = async (file: File) => {
     try {
       setUploading(true);
-      
+
       // Validate file type
       const validVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
       if (!validVideoTypes.includes(file.type)) {
@@ -163,28 +164,27 @@ export default function BannersPage() {
       alert('Please enter a title');
       return;
     }
-
     try {
+      const dataToSave = { ...bannerFormData };
+      // Remove any accidental image/bg_color fields
+      delete dataToSave.desktop_image;
+      delete dataToSave.mobile_image;
+      delete dataToSave.bg_color;
       if (editingBanner) {
         const { error } = await supabase
           .from('hero_banners')
-          .update({
-            ...bannerFormData,
-          })
+          .update(dataToSave)
           .eq('id', editingBanner.id);
-
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('hero_banners')
           .insert({
-            ...bannerFormData,
+            ...dataToSave,
             display_order: banners.length + 1,
           });
-
         if (error) throw error;
       }
-
       setShowBannerModal(false);
       resetBannerForm();
       fetchData();
@@ -237,11 +237,8 @@ export default function BannersPage() {
       badge_text: '',
       button_text: 'Shop Now',
       button_link: '/',
-      desktop_image: '',
-      mobile_image: '',
       video_url: '',
       media_type: 'video',
-      bg_color: 'from-blue-900/95 via-blue-800/90 to-blue-900/80',
       is_active: true
     });
     setEditingBanner(null);
@@ -255,11 +252,8 @@ export default function BannersPage() {
       badge_text: banner.badge_text,
       button_text: banner.button_text,
       button_link: banner.button_link,
-      desktop_image: banner.desktop_image || '',
-      mobile_image: banner.mobile_image || '',
       video_url: banner.video_url || '',
       media_type: banner.media_type || 'video',
-      bg_color: banner.bg_color,
       is_active: banner.is_active
     });
     setShowBannerModal(true);
@@ -268,7 +262,7 @@ export default function BannersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+        <div className="text-lg text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -278,15 +272,15 @@ export default function BannersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3 sm:mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Banners</h1>
-          <p className="text-xs sm:text-sm text-slate-600 mt-0.5">Manage hero banners</p>
+          <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">Banners</h1>
+          <p className="text-xs sm:text-sm text-gray-600 mt-0.5">Manage hero banners</p>
         </div>
         <button
           onClick={() => {
             resetBannerForm();
             setShowBannerModal(true);
           }}
-          className="flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs sm:text-sm"
+          className="flex items-center gap-1.5 px-2 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-purple-500/50 transition-all duration-300 text-xs sm:text-sm"
         >
           <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
           Add
@@ -295,13 +289,13 @@ export default function BannersPage() {
 
       {/* Stats */}
       <div className="mb-3 sm:mb-6">
-        <div className="bg-white rounded-lg sm:rounded-xl border border-[#E2E8F0] p-3 sm:p-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg p-3 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs sm:text-sm text-[#64748B]">Total Banners</p>
-              <p className="text-xl sm:text-2xl font-bold text-[#0F172A] mt-0.5 sm:mt-1">{banners.length}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Total Banners</p>
+              <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent mt-0.5 sm:mt-1">{banners.length}</p>
             </div>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-100 to-fuchsia-100 rounded-2xl flex items-center justify-center shadow-lg">
               <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -312,15 +306,15 @@ export default function BannersPage() {
 
       {/* Banners List */}
       {banners.length === 0 ? (
-        <div className="bg-white rounded-lg sm:rounded-xl border border-[#E2E8F0] p-8 text-center">
-          <p className="text-gray-500">No banners created yet</p>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 shadow-lg p-8 text-center">
+          <p className="text-gray-600">No banners created yet</p>
         </div>
       ) : (
         <div className="space-y-2 sm:space-y-3">
           {banners.map((banner) => (
             <div
               key={banner.id}
-              className="bg-white rounded-xl border-2 border-blue-100 overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all duration-200"
+              className="group bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-100/50 overflow-hidden hover:shadow-2xl hover:shadow-purple-200/50 hover:scale-105 transition-all duration-300"
             >
               {/* Banner Image Preview */}
               {banner.desktop_image && (
@@ -341,7 +335,7 @@ export default function BannersPage() {
               <div className="p-3 sm:p-4">
                 <div className="flex items-start gap-3">
                   {/* Order indicator */}
-                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg">
                     <span className="text-white font-bold text-xs sm:text-sm">#{banner.display_order}</span>
                   </div>
 
@@ -350,20 +344,20 @@ export default function BannersPage() {
                     {/* Title & Status */}
                     <div className="flex items-center gap-2 mb-1">
                       {!banner.desktop_image && (
-                        <h3 className="text-sm sm:text-base font-bold text-slate-800 truncate">{banner.title}</h3>
+                        <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">{banner.title}</h3>
                       )}
                       <button
                         onClick={() => toggleBannerActive(banner.id, banner.is_active)}
-                        className={`text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full font-medium flex-shrink-0 ${
+                        className={`text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full font-semibold flex-shrink-0 transition-all duration-300 shadow-lg ${
                           banner.is_active
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-600'
+                            ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-white'
+                            : 'bg-gradient-to-r from-slate-300 to-slate-400 text-white'
                         }`}
                       >
                         {banner.is_active ? 'Active' : 'Inactive'}
                       </button>
                       {banner.badge_text && (
-                        <span className="px-1.5 py-0.5 text-[10px] bg-blue-100 text-blue-800 rounded flex-shrink-0">
+                        <span className="px-1.5 py-0.5 text-[10px] bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full font-semibold flex-shrink-0 shadow-lg">
                           {banner.badge_text}
                         </span>
                       )}
@@ -376,7 +370,7 @@ export default function BannersPage() {
 
                     {/* Details */}
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                      <span className="bg-gray-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <span className="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full flex items-center gap-1 font-medium">
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
@@ -386,8 +380,8 @@ export default function BannersPage() {
                         <span className="text-purple-600 font-medium">🎥 Video</span>
                       ) : (
                         <>
-                          {banner.desktop_image && <span className="text-green-600 font-medium">✓ Desktop</span>}
-                          {banner.mobile_image && <span className="text-green-600 font-medium">✓ Mobile</span>}
+                          {banner.desktop_image && <span className="text-emerald-600 font-medium">✓ Desktop</span>}
+                          {banner.mobile_image && <span className="text-emerald-600 font-medium">✓ Mobile</span>}
                         </>
                       )}
                     </div>
@@ -397,13 +391,13 @@ export default function BannersPage() {
                   <div className="flex flex-col gap-1.5 flex-shrink-0">
                     <button
                       onClick={() => editBanner(banner)}
-                      className="px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors font-medium"
+                      className="px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white hover:from-purple-600 hover:to-fuchsia-600 rounded-xl transition-all duration-300 font-semibold shadow-lg"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => deleteBanner(banner.id)}
-                      className="px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors font-medium"
+                      className="px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs bg-gradient-to-r from-rose-500 to-pink-500 text-white hover:from-rose-600 hover:to-pink-600 rounded-xl transition-all duration-300 font-semibold shadow-lg"
                     >
                       Delete
                     </button>
@@ -420,21 +414,21 @@ export default function BannersPage() {
       {/* Banner Modal */}
       <AnimatePresence>
         {showBannerModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-purple-500/20 border border-purple-100"
             >
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-6 border-b border-purple-100">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">
+                  <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
                     {editingBanner ? 'Edit Banner' : 'Add Banner'}
                   </h3>
                   <button
                     onClick={() => setShowBannerModal(false)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-700 p-2 hover:bg-purple-100 rounded-full transition-all duration-300"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -443,114 +437,98 @@ export default function BannersPage() {
 
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Title *
                   </label>
                   <input
                     type="text"
                     value={bannerFormData.title}
                     onChange={(e) => setBannerFormData({ ...bannerFormData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
                     placeholder="Enter banner title"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Subtitle
                   </label>
                   <textarea
                     value={bannerFormData.subtitle}
                     onChange={(e) => setBannerFormData({ ...bannerFormData, subtitle: e.target.value })}
                     rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
                     placeholder="Enter banner subtitle"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Badge Text
                     </label>
                     <input
                       type="text"
                       value={bannerFormData.badge_text}
                       onChange={(e) => setBannerFormData({ ...bannerFormData, badge_text: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
                       placeholder="NEW ARRIVALS"
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Background Color (Optional)
-                    </label>
-                    <select
-                      value={bannerFormData.bg_color}
-                      onChange={(e) => setBannerFormData({ ...bannerFormData, bg_color: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {bgColorOptions.map((color, index) => (
-                        <option key={color} value={color}>
-                          {index === 0 ? 'Blue (Default)' : 
-                           index === 1 ? 'Green' :
-                           index === 2 ? 'Purple' :
-                           index === 3 ? 'Orange' :
-                           index === 4 ? 'Red' : 'Teal'}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">Color overlay on banner image</p>
-                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Button Text
-                    </label>
-                    <input
-                      type="text"
-                      value={bannerFormData.button_text}
-                      onChange={(e) => setBannerFormData({ ...bannerFormData, button_text: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Shop Now"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Button Text
+                  </label>
+                  <input
+                    type="text"
+                    value={bannerFormData.button_text}
+                    onChange={(e) => setBannerFormData({ ...bannerFormData, button_text: e.target.value })}
+                    className="w-full px-3 py-2 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
+                    placeholder="Shop Now"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Button Link
-                    </label>
-                    <input
-                      type="text"
-                      value={bannerFormData.button_link}
-                      onChange={(e) => setBannerFormData({ ...bannerFormData, button_link: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="/category/fish-tanks"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Button Link (Category)
+                  </label>
+                  <select
+                    value={bannerFormData.button_link}
+                    onChange={(e) => setBannerFormData({ ...bannerFormData, button_link: e.target.value })}
+                    className="w-full px-3 py-2 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white transition-all duration-300"
+                  >
+                    <option value="/">Home</option>
+                    {categories.map((category) => (
+                      <option key={category.slug} value={`/category/${category.slug}`}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select which category page this banner should link to
+                  </p>
                 </div>
 
                 {/* Video Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Upload Video
                     </label>
                     {bannerFormData.video_url ? (
                       <div className="space-y-2">
                         <div className="relative">
-                          <video 
-                            src={bannerFormData.video_url} 
-                            className="w-full h-48 object-cover rounded-lg"
+                          <video
+                            src={bannerFormData.video_url}
+                            className="w-full h-48 object-cover rounded-xl"
                             controls
                           />
-                          <div className={`absolute inset-0 bg-gradient-to-br ${bannerFormData.bg_color} opacity-50 rounded-lg pointer-events-none`} />
+                          <div className={`absolute inset-0 bg-gradient-to-br ${bannerFormData.bg_color} opacity-50 rounded-xl pointer-events-none`} />
                         </div>
                         <button
                           onClick={() => setBannerFormData({ ...bannerFormData, video_url: '' })}
-                          className="text-red-600 text-sm hover:underline"
+                          className="text-red-600 text-sm hover:underline font-semibold"
                         >
                           Remove Video
                         </button>
@@ -564,14 +542,14 @@ export default function BannersPage() {
                             const file = e.target.files?.[0];
                             if (file) handleVideoUpload(file);
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
                           disabled={uploading}
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           Supported: MP4, WebM, OGG • Max size: 50MB • Recommended: 1920x1080
                         </p>
                         {uploading && (
-                          <p className="text-xs text-blue-600 mt-2">Uploading video...</p>
+                          <p className="text-xs text-purple-600 mt-2 font-semibold">Uploading video...</p>
                         )}
                       </div>
                     )}
@@ -583,25 +561,25 @@ export default function BannersPage() {
                     id="is_active"
                     checked={bannerFormData.is_active}
                     onChange={(e) => setBannerFormData({ ...bannerFormData, is_active: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 text-purple-600 bg-gray-100 border-purple-300 rounded focus:ring-purple-500 focus:ring-2"
                   />
-                  <label htmlFor="is_active" className="ml-2 text-sm font-medium text-gray-700">
+                  <label htmlFor="is_active" className="ml-2 text-sm font-semibold text-gray-700">
                     Active
                   </label>
                 </div>
               </div>
 
-              <div className="p-6 border-t border-gray-200 flex gap-3">
+              <div className="p-6 border-t border-purple-100 flex gap-3">
                 <button
                   onClick={() => setShowBannerModal(false)}
-                  className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 text-gray-700 border border-purple-200 rounded-xl hover:bg-purple-50 font-semibold transition-all duration-300"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveBanner}
                   disabled={uploading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 disabled:opacity-50"
                 >
                   {uploading ? 'Uploading...' : editingBanner ? 'Update Banner' : 'Create Banner'}
                 </button>

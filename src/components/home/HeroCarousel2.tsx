@@ -71,7 +71,7 @@ const fallbackSlides = [
     mobile_image: null,
     video_url: null,
     media_type: 'image' as const,
-    bg_color: "from-emerald-900/95 via-emerald-800/90 to-emerald-900/80",
+    bg_color: "",
     is_active: true,
     display_order: 1
   },
@@ -86,7 +86,7 @@ const fallbackSlides = [
     mobile_image: null,
     video_url: null,
     media_type: 'image' as const,
-    bg_color: "from-blue-900/95 via-blue-800/90 to-blue-900/80",
+    bg_color: "",
     is_active: true,
     display_order: 2
   },
@@ -101,7 +101,7 @@ const fallbackSlides = [
     mobile_image: null,
     video_url: null,
     media_type: 'image' as const,
-    bg_color: "from-purple-900/95 via-purple-800/90 to-purple-900/80",
+    bg_color: "",
     is_active: true,
     display_order: 3
   }
@@ -125,6 +125,18 @@ export function HeroCarousel() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Auto-carousel - advance to next slide every 5 seconds
+  useEffect(() => {
+    if (banners.length <= 1) return; // Don't auto-advance if only one slide
+
+    const interval = setInterval(() => {
+      setDirection(1);
+      setCurrentSlide((prev) => (prev + 1) % banners.length);
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [banners.length]);
 
   const fetchData = async () => {
     try {
@@ -255,13 +267,7 @@ export function HeroCarousel() {
           }}
           className="absolute inset-0"
         >
-          <div
-            className={cn(
-              "relative w-full h-full flex items-center",
-              "bg-gradient-to-br",
-              banners[currentSlide]?.bg_color || "from-blue-900/95 via-blue-800/90 to-blue-900/80"
-            )}
-          >
+          <div className="relative w-full h-full flex items-center">
             {/* Background Image or Video */}
             {banners[currentSlide]?.media_type === 'video' && banners[currentSlide]?.video_url ? (
               <div className="absolute inset-0">
@@ -273,10 +279,8 @@ export function HeroCarousel() {
                   playsInline
                   className="w-full h-full object-cover"
                 />
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-br",
-                  banners[currentSlide]?.bg_color || "from-blue-900/95 via-blue-800/90 to-blue-900/80"
-                )} />
+                {/* Dark gradient at bottom for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
             ) : banners[currentSlide]?.desktop_image ? (
               <div className="absolute inset-0">
@@ -293,10 +297,8 @@ export function HeroCarousel() {
                     className="w-full h-full object-cover"
                   />
                 </picture>
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-br",
-                  banners[currentSlide]?.bg_color || "from-blue-900/95 via-blue-800/90 to-blue-900/80"
-                )} />
+                {/* Dark gradient at bottom for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
             ) : null}
 

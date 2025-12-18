@@ -74,7 +74,8 @@ export function FeaturedProducts() {
         .select('*')
         .eq('is_featured', true)
         .eq('is_active', true)
-        .limit(8);
+        .order('created_at', { ascending: false })
+        .limit(5);
       
       if (!error && data) {
         setProducts(data.map(p => ({
@@ -84,10 +85,16 @@ export function FeaturedProducts() {
           originalPrice: p.mrp || undefined,
           image: p.image_url,
           category: p.category,
+          description: p.description || undefined,
           rating: p.rating || 4.0,
+          ratingCount: p.rating_count || 0,
+          discountPercent: p.discount_percent || undefined,
           inStock: p.stock_status === 'in_stock',
+          stockStatus: p.stock_status,
+          stockQuantity: p.quantity ?? 0,
           isNew: p.is_new || false,
           isBestSeller: p.is_best_seller || false,
+          contactForPrice: false,
           slug: p.slug
         })));
       }
@@ -118,7 +125,7 @@ export function NewArrivals() {
         .eq('is_new', true)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(8);
+        .limit(10);
       
       if (!error && data) {
         setProducts(data.map(p => ({
@@ -128,10 +135,16 @@ export function NewArrivals() {
           originalPrice: p.mrp || undefined,
           image: p.image_url,
           category: p.category,
+          description: p.description || undefined,
           rating: p.rating || 4.0,
+          ratingCount: p.rating_count || 0,
+          discountPercent: p.discount_percent || undefined,
           inStock: p.stock_status === 'in_stock',
+          stockStatus: p.stock_status,
+          stockQuantity: p.quantity ?? 0,
           isNew: p.is_new || false,
           isBestSeller: p.is_best_seller || false,
+          contactForPrice: false,
           slug: p.slug
         })));
       }
@@ -157,12 +170,13 @@ export function BestSellers() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data, error } = await supabase
+      const { data, error} = await supabase
         .from('products')
         .select('*')
         .eq('is_best_seller', true)
         .eq('is_active', true)
-        .limit(8);
+        .order('created_at', { ascending: false })
+        .limit(5);
       
       if (!error && data) {
         setProducts(data.map(p => ({
@@ -172,10 +186,16 @@ export function BestSellers() {
           originalPrice: p.mrp || undefined,
           image: p.image_url,
           category: p.category,
+          description: p.description || undefined,
           rating: p.rating || 4.0,
+          ratingCount: p.rating_count || 0,
+          discountPercent: p.discount_percent || undefined,
           inStock: p.stock_status === 'in_stock',
+          stockStatus: p.stock_status,
+          stockQuantity: p.quantity ?? 0,
           isNew: p.is_new || false,
           isBestSeller: p.is_best_seller || false,
+          contactForPrice: false,
           slug: p.slug
         })));
       }
@@ -221,6 +241,7 @@ export function SpecialOffers() {
           category: p.category,
           rating: p.rating || 4.0,
           inStock: p.stock_status === 'in_stock',
+          stockStatus: p.stock_status,
           isNew: p.is_new || false,
           isBestSeller: p.is_best_seller || false,
           slug: p.slug

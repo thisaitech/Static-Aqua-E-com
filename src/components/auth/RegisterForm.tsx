@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { Input } from '@/components/ui/Input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/Button'
 
 export default function RegisterForm() {
@@ -27,6 +28,20 @@ export default function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    // Mobile number validation (India, 10 digits, allows +91, spaces, dashes)
+    const phoneClean = formData.phone.replace(/\D/g, '');
+    if (!(phoneClean.length === 10 || (phoneClean.length === 12 && phoneClean.startsWith('91')))) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
@@ -110,10 +125,9 @@ export default function RegisterForm() {
           <label htmlFor="password" className="block text-sm font-medium mb-2">
             Password
           </label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             value={formData.password}
             onChange={handleChange}
             required
@@ -126,10 +140,9 @@ export default function RegisterForm() {
           <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
             Confirm Password
           </label>
-          <Input
+          <PasswordInput
             id="confirmPassword"
             name="confirmPassword"
-            type="password"
             value={formData.confirmPassword}
             onChange={handleChange}
             required

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -17,7 +18,9 @@ import {
   ChevronDown,
   MapPin,
   Truck,
-  Package
+  Package,
+  LogOut,
+  Settings
 } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 import { useAuth } from '@/context/AuthContext';
@@ -31,15 +34,28 @@ interface NavCategory {
   show_in_hero: boolean;
 }
 
+interface SearchProduct {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string;
+}
+
 export function Header() {
+  const router = useRouter();
   const { cartCount, toggleCart, toggleAuthModal, wishlist } = useStore();
-  const { user, userRole } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [mainCategories, setMainCategories] = useState<NavCategory[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchProduct[]>([]);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -47,6 +63,11 @@ export function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close user menu when user changes (login/logout)
+  useEffect(() => {
+    setShowUserMenu(false);
+  }, [user]);
 
   useEffect(() => {
     if (isDark) {
@@ -59,6 +80,67 @@ export function Header() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Live search with debounce
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery.trim().length >= 2) {
+        performLiveSearch(searchQuery.trim());
+      } else {
+        setSearchResults([]);
+        setShowSearchDropdown(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.search-container')) {
+        setShowSearchDropdown(false);
+      }
+      if (!target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showSearchDropdown || showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSearchDropdown, showUserMenu]);
+
+  const performLiveSearch = async (query: string) => {
+    setIsSearching(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, price, image_url')
+        .eq('is_active', true)
+        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+        .limit(5);
+
+      if (error) {
+        console.error('Error searching products:', error);
+        setSearchResults([]);
+      } else {
+        setSearchResults(data || []);
+        setShowSearchDropdown(true);
+      }
+    } catch (error) {
+      console.error('Error searching products:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -97,28 +179,40 @@ export function Header() {
     return iconMap[name.toLowerCase()] || '📦';
   };
 
+  const handleSearch = (e: React.FormEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearch(false);
+      setShowSearchDropdown(false);
+      setSearchQuery('');
+    }
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+    } else if (e.key === 'Escape') {
+      setShowSearchDropdown(false);
+    }
+  };
+
+  const handleProductClick = (productId: string) => {
+    router.push(`/product/${productId}`);
+    setShowSearchDropdown(false);
+    setSearchQuery('');
+  };
+
+  const handleViewAllResults = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearchDropdown(false);
+      setSearchQuery('');
+    }
+  };
+
   return (
     <>
-      {/* Top Bar - Flipkart style */}
-      <div className="bg-primary-600 text-white text-xs py-1.5 hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1">
-              <Truck className="w-3.5 h-3.5" />
-              Free Delivery on orders above ₹2,000
-            </span>
-            <span className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
-              Delivering across Tamil Nadu
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/register" className="hover:underline">Become a Seller</Link>
-            <span>24/7 Customer Support</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Header */}
       <header 
         className={cn(
@@ -146,18 +240,60 @@ export function Header() {
               </div>
             </Link>
 
-            {/* Search Bar - Flipkart style */}
-            <div className="hidden md:flex flex-1 max-w-2xl">
-              <div className="relative w-full">
+            {/* Search Bar - Flipkart style with Live Search */}
+            <div className="hidden md:flex flex-1 max-w-2xl relative search-container">
+              <form onSubmit={handleSearch} className="relative w-full">
                 <input
                   type="text"
                   placeholder="Search for Fish Tanks, Plants, Birds and more..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  onFocus={() => searchResults.length > 0 && setShowSearchDropdown(true)}
                   className="w-full pl-12 pr-4 py-2.5 bg-primary-50 dark:bg-slate-800 border-0 rounded-lg text-sm text-slate-800 dark:text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-500" />
-              </div>
+                {isSearching && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500"></div>
+                  </div>
+                )}
+              </form>
+
+              {/* Search Dropdown */}
+              {showSearchDropdown && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 max-h-96 overflow-y-auto z-50">
+                  {searchResults.map((product) => (
+                    <button
+                      key={product.id}
+                      onClick={() => handleProductClick(product.id)}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left border-b border-slate-100 dark:border-slate-700 last:border-b-0"
+                    >
+                      <img
+                        src={product.image_url || '/placeholder.png'}
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-800 dark:text-white line-clamp-1">
+                          {product.name}
+                        </p>
+                        <p className="text-sm text-primary-600 dark:text-primary-400 font-semibold">
+                          ₹{product.price.toLocaleString()}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                  {searchResults.length > 0 && (
+                    <button
+                      onClick={handleViewAllResults}
+                      className="w-full px-4 py-3 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-center"
+                    >
+                      View all results for "{searchQuery}"
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Right Actions */}
@@ -178,26 +314,94 @@ export function Header() {
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              {/* Login - Flipkart style */}
-              <button 
-                onClick={toggleAuthModal}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <User className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium text-slate-700 dark:text-white">
-                    {user ? user.email?.split('@')[0] : 'Login'}
-                  </span>
-                  {user && userRole === 'admin' && (
-                    <span className="text-xs text-primary-600 dark:text-primary-400">Admin</span>
-                  )}
-                </div>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
-              </button>
+              {/* Login/User Menu - Flipkart style */}
+              <div className="hidden sm:block relative user-menu-container">
+                <button
+                  onClick={() => user ? setShowUserMenu(!showUserMenu) : toggleAuthModal()}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <User className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium text-slate-700 dark:text-white">
+                      {user ? user.email?.split('@')[0] : 'Login'}
+                    </span>
+                    {user && userRole === 'admin' && (
+                      <span className="text-xs text-primary-600 dark:text-primary-400">Admin</span>
+                    )}
+                  </div>
+                  {user && <ChevronDown className="w-4 h-4 text-slate-400" />}
+                </button>
+
+                {/* User Dropdown Menu */}
+                {user && showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50"
+                  >
+                    <div className="p-3 bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">
+                        {user.email}
+                      </p>
+                      {userRole === 'admin' && (
+                        <p className="text-xs text-primary-600 dark:text-primary-400">Administrator</p>
+                      )}
+                    </div>
+
+                    <div className="py-2">
+                      {userRole === 'admin' && (
+                        <Link
+                          href="/admin/dashboard"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <Link
+                        href="/my-orders"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Package className="w-4 h-4" />
+                        My Orders
+                      </Link>
+                      <Link
+                        href="/wishlist"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Heart className="w-4 h-4" />
+                        Wishlist
+                        {wishlist.length > 0 && (
+                          <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                            {wishlist.length}
+                          </span>
+                        )}
+                      </Link>
+                    </div>
+
+                    <div className="border-t border-slate-200 dark:border-slate-600">
+                      <button
+                        onClick={async () => {
+                          setShowUserMenu(false);
+                          await signOut();
+                        }}
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
 
               {/* My Orders */}
               <Link
-                href="/my-orders"
+                href="/orders"
                 className="hidden lg:flex items-center gap-1 p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <Package className="w-5 h-5" />
@@ -248,25 +452,71 @@ export function Header() {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
+          {/* Mobile Search Bar with Live Search */}
           <AnimatePresence>
             {showSearch && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="md:hidden pb-3 overflow-hidden"
+                className="md:hidden pb-3 overflow-visible relative search-container"
               >
-                <div className="relative">
+                <form onSubmit={handleSearch} className="relative">
                   <input
                     type="text"
                     placeholder="Search products..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    onFocus={() => searchResults.length > 0 && setShowSearchDropdown(true)}
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                </div>
+                  {isSearching && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500"></div>
+                    </div>
+                  )}
+                </form>
+
+                {/* Mobile Search Dropdown */}
+                {showSearchDropdown && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 max-h-80 overflow-y-auto z-50">
+                    {searchResults.map((product) => (
+                      <button
+                        key={product.id}
+                        onClick={() => {
+                          handleProductClick(product.id);
+                          setShowSearch(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left border-b border-slate-100 dark:border-slate-700 last:border-b-0"
+                      >
+                        <img
+                          src={product.image_url || '/placeholder.png'}
+                          alt={product.name}
+                          className="w-10 h-10 object-cover rounded"
+                        />
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-slate-800 dark:text-white line-clamp-1">
+                            {product.name}
+                          </p>
+                          <p className="text-xs text-primary-600 dark:text-primary-400 font-semibold">
+                            ₹{product.price.toLocaleString()}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => {
+                        handleViewAllResults();
+                        setShowSearch(false);
+                      }}
+                      className="w-full px-3 py-2.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-center"
+                    >
+                      View all results for "{searchQuery}"
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

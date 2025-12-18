@@ -14,12 +14,41 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0, variant = 'default' }: ProductCardProps) {
-  const { addToCart, toggleWishlist, isInWishlist } = useStore();
+  const { addToCart, toggleWishlist, isInWishlist, user, toggleAuthModal } = useStore();
   const inWishlist = isInWishlist(product.id);
 
-  const discount = product.originalPrice 
-    ? Math.round((1 - product.price / product.originalPrice) * 100) 
-    : 0;
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      alert('Please login to add items to cart');
+      toggleAuthModal();
+      return;
+    }
+    if (!product.contactForPrice) {
+      addToCart(product);
+    }
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      alert('Please login to add items to wishlist');
+      toggleAuthModal();
+      return;
+    }
+    console.log('ProductCard - Toggling wishlist for product:', product.id);
+    console.log('ProductCard - Current inWishlist state:', inWishlist);
+    toggleWishlist(product.id);
+  };
+
+  // Use discount from database if available, otherwise calculate
+  const discount = product.discountPercent ?? (
+    product.originalPrice
+      ? Math.round((1 - product.price / product.originalPrice) * 100)
+      : 0
+  );
 
   if (variant === 'horizontal') {
     return (
@@ -47,9 +76,9 @@ export function ProductCard({ product, index = 0, variant = 'default' }: Product
           </Link>
           <div className="flex items-center gap-1 mt-1">
             <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-600 text-white text-xs font-semibold rounded">
-              4.0 <Star className="w-3 h-3 fill-current" />
+              {product.rating?.toFixed(1) || '4.0'} <Star className="w-3 h-3 fill-current" />
             </span>
-            <span className="text-xs text-slate-400">(128)</span>
+            <span className="text-xs text-slate-400">({product.ratingCount || 0})</span>
           </div>
           <div className="flex items-center gap-2 mt-2">
             {product.contactForPrice ? (
@@ -118,11 +147,7 @@ export function ProductCard({ product, index = 0, variant = 'default' }: Product
 
           {/* Wishlist Button */}
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              toggleWishlist(product.id);
-            }}
+            onClick={handleToggleWishlist}
             className={cn(
               'absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-md',
               inWishlist
@@ -136,13 +161,7 @@ export function ProductCard({ product, index = 0, variant = 'default' }: Product
           {/* Quick Add Button - Shows on hover */}
           <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!product.contactForPrice) {
-                  addToCart(product);
-                }
-              }}
+              onClick={handleAddToCart}
               className={cn(
                 'w-full py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all',
                 product.contactForPrice
@@ -179,16 +198,26 @@ export function ProductCard({ product, index = 0, variant = 'default' }: Product
             {product.name}
           </h3>
 
-          {/* Rating */}
-          <div className="flex items-center gap-1.5 mt-2">
+          {/* Rating & Stock */}
+          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-600 text-white text-xs font-semibold rounded">
-              4.0 <Star className="w-3 h-3 fill-current" />
+              {product.rating?.toFixed(1) || '4.0'} <Star className="w-3 h-3 fill-current" />
             </span>
-            <span className="text-xs text-slate-400">(128)</span>
-            {product.inStock && (
-              <span className="ml-auto inline-flex items-center gap-0.5 text-[10px] text-green-600 font-medium">
+            <span className="text-xs text-slate-400">({product.ratingCount || 0})</span>
+            {product.stockStatus === 'in_stock' && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded border border-blue-200">
                 <Check className="w-3 h-3" />
                 In Stock
+              </span>
+            )}
+            {product.stockStatus === 'low_stock' && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 text-amber-700 text-xs font-semibold rounded border border-amber-200">
+                Low Stock
+              </span>
+            )}
+            {product.stockStatus === 'out_of_stock' && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-red-50 text-red-700 text-xs font-semibold rounded border border-red-200">
+                Out of Stock
               </span>
             )}
           </div>
@@ -219,10 +248,10 @@ export function ProductCard({ product, index = 0, variant = 'default' }: Product
           </div>
 
           {/* Free Delivery Tag */}
-          {!product.contactForPrice && product.price >= 500 && (
+          {!product.contactForPrice && product.price >= 1000 && (
             <p className="mt-2 text-[11px] text-slate-500 flex items-center gap-1">
               <Zap className="w-3 h-3 text-amber-500" />
-              Free delivery above ₹2,000
+              Free delivery above ₹1,000
             </p>
           )}
         </div>

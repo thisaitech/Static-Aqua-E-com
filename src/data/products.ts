@@ -8,12 +8,16 @@ export interface Product {
   image: string;
   description?: string;
   inStock: boolean;
+  stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock';
+  stockQuantity?: number;
   isNew?: boolean;
   isBestSeller?: boolean;
   isFeatured?: boolean;
   contactForPrice?: boolean;
   slug?: string;
   rating?: number;
+  ratingCount?: number;
+  discountPercent?: number;
   type?: string;
   product_category?: string;
 }
