@@ -27,12 +27,13 @@ function SearchResults() {
     try {
       const supabase = createClient();
 
-      // Search products by name and description with proper ilike syntax
+      // Search products by name, description, and category
+      const searchTerm = `%${searchQuery}%`;
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('is_active', true)
-        .or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+        .or(`name.ilike.${searchTerm},description.ilike.${searchTerm},category.ilike.${searchTerm}`)
         .order('created_at', { ascending: false });
 
       if (error) {
