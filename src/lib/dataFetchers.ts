@@ -33,13 +33,17 @@ export interface Product {
   image: string;
   description: string;
   inStock: boolean;
-  stockStatus?: string;
+  stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock';
+  stockQuantity?: number;
   isNew?: boolean;
   isBestSeller?: boolean;
   isFeatured?: boolean;
   contactForPrice?: boolean;
   rating?: number;
   ratingCount?: number;
+  discountPercent?: number;
+  slug?: string;
+  product_category?: string;
 }
 
 export interface HeroBanner {
