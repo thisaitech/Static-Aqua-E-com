@@ -129,9 +129,15 @@ export default function CheckoutPage() {
 
   const handleRazorpayPayment = async (dbOrderId: string) => {
     try {
-      // Check if Razorpay is loaded
+      // Wait for Razorpay to load (with timeout)
+      let attempts = 0;
+      while (typeof window.Razorpay === 'undefined' && attempts < 30) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+
       if (typeof window.Razorpay === 'undefined') {
-        alert('Payment gateway is loading. Please try again in a moment.');
+        alert('Payment gateway failed to load. Please check your internet connection and try again.');
         setLoading(false);
         return;
       }
@@ -161,7 +167,7 @@ export default function CheckoutPage() {
 
       // Initialize Razorpay checkout
       const options = {
-        key: 'rzp_test_RrVPw4temWVxGs', // Use the actual key directly
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RrVPw4temWVxGs',
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         name: 'Rainbow Aqua',
@@ -234,11 +240,55 @@ export default function CheckoutPage() {
           ondismiss: function() {
             setLoading(false);
             alert('Payment cancelled. Your order is saved and you can complete payment later.');
+          },
+          // Mobile-specific settings
+          escape: false,
+          backdrop_close: false,
+          animation: true,
+          confirm_close: false
+        },
+        config: {
+          display: {
+            blocks: {
+              banks: {
+                name: 'All payment methods',
+                instruments: [
+                  {
+                    method: 'upi'
+                  },
+                  {
+                    method: 'card'
+                  },
+                  {
+                    method: 'wallet'
+                  },
+                  {
+                    method: 'netbanking'
+                  }
+                ]
+              }
+            },
+            sequence: ['block.banks'],
+            preferences: {
+              show_default_blocks: true
+            }
           }
+        },
+        retry: {
+          enabled: true,
+          max_count: 4
         }
       };
 
       const razorpayInstance = new window.Razorpay(options);
+
+      // Add error handler for mobile
+      razorpayInstance.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response.error);
+        setLoading(false);
+        alert(`Payment failed: ${response.error.description || 'Unknown error'}. Please try again.`);
+      });
+
       razorpayInstance.open();
     } catch (error) {
       console.error('Error initiating Razorpay payment:', error);
