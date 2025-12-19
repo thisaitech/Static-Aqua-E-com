@@ -47,7 +47,6 @@ export async function POST(request: Request) {
     // Update order in database with payment details
     // Use service role client to bypass RLS
     if (orderId) {
-      console.log('Updating order:', orderId, 'with payment details');
 
       // Create service role client (bypasses RLS)
       const supabaseAdmin = createServiceClient(
@@ -89,7 +88,6 @@ export async function POST(request: Request) {
         );
       }
 
-      console.log('✅ Order updated successfully:', updateData);
     } else {
       console.warn('⚠️ No orderId provided for payment verification');
     }

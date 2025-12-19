@@ -1,6 +1,6 @@
-# Rainbow Aqua - Premium Aquarium & Exotic Birds Store
+# Rainbow Aquarium - Premium Aquarium & Exotic Birds Store
 
-![Rainbow Aqua](https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&h=400&fit=crop)
+![Rainbow Aquarium](https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=1200&h=400&fit=crop)
 
 A beautiful, lightning-fast e-commerce website for an Indian store selling premium aquarium products and fancy birds. Built with Next.js 14, Tailwind CSS, and Framer Motion.
 
@@ -60,10 +60,10 @@ A beautiful, lightning-fast e-commerce website for an Indian store selling premi
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rainbow-aqua.git
+git clone https://github.com/yourusername/rainbow-aquarium.git
 
 # Navigate to project directory
-cd rainbow-aqua
+cd rainbow-aquarium
 
 # Install dependencies
 npm install
@@ -97,7 +97,7 @@ npm run start
 
 ### Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/rainbow-aqua)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/rainbow-aquarium)
 
 ### Deploy to Netlify
 
@@ -115,7 +115,7 @@ npm run build
 ## 📁 Project Structure
 
 ```
-rainbow-aqua/
+rainbow-aquarium/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
 │   │   ├── category/[slug]/    # Category pages

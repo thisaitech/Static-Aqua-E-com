@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 async function setupStorage() {
   try {
-    console.log('Setting up storage bucket for banner images...');
+   
 
     // Create storage bucket if it doesn't exist
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
@@ -42,9 +42,9 @@ async function setupStorage() {
         return;
       }
 
-      console.log('✓ Storage bucket "images" created successfully');
+
     } else {
-      console.log('✓ Storage bucket "images" already exists');
+      
     }
 
     // Set up RLS policies for the storage bucket
@@ -71,11 +71,8 @@ async function setupStorage() {
     if (policyError) {
       console.error('Error setting storage policies:', policyError);
     } else {
-      console.log('✓ Storage policies configured');
     }
 
-    console.log('\n🎉 Storage setup completed successfully!');
-    console.log('You can now upload banner images through the admin panel');
 
   } catch (error) {
     console.error('Error setting up storage:', error);

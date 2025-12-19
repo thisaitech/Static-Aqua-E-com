@@ -86,7 +86,7 @@ Add this to console when you login:
 
 ```javascript
 // In browser console after login
-console.log('Current User ID:', localStorage.getItem('rainbow-aqua-user'));
+
 ```
 
 Compare the user IDs before and after logout/login. If they're the SAME, then the wishlist SHOULD persist.

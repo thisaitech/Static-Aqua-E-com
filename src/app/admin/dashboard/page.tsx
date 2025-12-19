@@ -49,7 +49,6 @@ export default function AdminDashboard() {
           table: 'products'
         },
         () => {
-          console.log('Product change detected, refreshing dashboard...')
           fetchStats()
         }
       )
@@ -66,7 +65,6 @@ export default function AdminDashboard() {
           table: 'orders'
         },
         () => {
-          console.log('Order change detected, refreshing dashboard...')
           fetchStats()
         }
       )
@@ -95,7 +93,6 @@ export default function AdminDashboard() {
         .from('orders')
         .select('total_amount, payment_status')
 
-      console.log('Orders query result:', { orders, ordersError })
 
       if (ordersError) {
         console.error('Error fetching orders:', ordersError)
@@ -121,23 +118,13 @@ export default function AdminDashboard() {
         let totalRevenue = 0
         let completedOrders = 0
         if (orders && orders.length > 0) {
-          console.log('Processing orders:', orders)
           const completedOrdersList = orders.filter(order => order.payment_status === 'completed')
-          console.log('Completed orders:', completedOrdersList)
           completedOrders = completedOrdersList.length
           totalRevenue = completedOrdersList.reduce((sum, order) => sum + (order.total_amount || 0), 0)
         } else {
-          console.log('No orders found or orders is null/empty')
+       
         }
 
-        console.log('Dashboard Stats:', {
-          total: products.length,
-          active: activeProducts,
-          outOfStock,
-          newArrivals,
-          completedOrders,
-          revenue: totalRevenue
-        })
 
         setStats({
           totalProducts: products.length,

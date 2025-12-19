@@ -101,7 +101,7 @@ export default function AddProductPage() {
     if (error) {
       console.error('Error fetching categories:', error)
     } else {
-      console.log('Categories fetched:', data)
+ 
       setCategories(data || [])
     }
   }
@@ -110,28 +110,22 @@ export default function AddProductPage() {
     setFormData({ ...formData, category_id: categoryId, type: '', product_category: '' })
     
     const selectedCategory = categories.find(cat => cat.id === categoryId)
-    console.log('=== Category Change Debug ===')
-    console.log('Category ID:', categoryId)
-    console.log('Selected category:', selectedCategory)
-    console.log('Types from category:', selectedCategory?.types)
-    console.log('Is array?:', Array.isArray(selectedCategory?.types))
-    console.log('Categories from category:', selectedCategory?.category)
-    console.log('Is array?:', Array.isArray(selectedCategory?.category))
+
     
     if (selectedCategory && selectedCategory.category && selectedCategory.category.length > 0) {
-      console.log('✓ Setting available categories:', selectedCategory.category)
+   
       setAvailableCategories(selectedCategory.category)
     } else {
-      console.log('✗ No categories found, clearing dropdown')
+ 
       setAvailableCategories([])
     }
-    console.log('Length:', selectedCategory?.types?.length)
+  
     
     if (selectedCategory && selectedCategory.types && selectedCategory.types.length > 0) {
-      console.log('✓ Setting available types:', selectedCategory.types)
+  
       setAvailableTypes(selectedCategory.types)
     } else {
-      console.log('✗ No types found, clearing dropdown')
+   
       setAvailableTypes([])
     }
   }

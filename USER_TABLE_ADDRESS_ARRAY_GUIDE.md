@@ -475,9 +475,9 @@ HAVING default_count > 1;
 ```javascript
 // Check API response
 const response = await fetch('/api/user-addresses');
-console.log('Status:', response.status);
+
 const data = await response.json();
-console.log('Data:', data);
+
 ```
 
 ---

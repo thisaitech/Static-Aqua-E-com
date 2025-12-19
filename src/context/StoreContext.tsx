@@ -136,7 +136,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Function to fetch cart from Supabase (defined before useEffect)
   const fetchCartFromSupabase = React.useCallback(async (userId: string) => {
-    console.log('StoreContext - Fetching cart from Supabase for user:', userId);
+    
     const supabase = createSupabaseClient();
     const { data, error } = await supabase
       .from('cart_items')
@@ -145,12 +145,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (data && data.cart_data) {
-      console.log('StoreContext - Cart loaded from Supabase:', data.cart_data);
+      
       dispatch({ type: 'LOAD_CART', payload: data.cart_data });
       hasLoadedDataRef.current = true; // Mark that we've loaded data
     } else if (error && error.code === 'PGRST116') {
       // No cart found in Supabase - start with empty cart
-      console.log('StoreContext - No cart found in Supabase, starting with empty cart');
       dispatch({ type: 'LOAD_CART', payload: [] });
       hasLoadedDataRef.current = true; // Mark that we've loaded (even if empty)
     } else if (error) {
@@ -162,7 +161,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Function to fetch wishlist from Supabase (defined before useEffect)
   const fetchWishlistFromSupabase = React.useCallback(async (userId: string) => {
-    console.log('StoreContext - Fetching wishlist from Supabase for user:', userId);
     const supabase = createSupabaseClient();
     const { data, error } = await supabase
       .from('wishlists')
@@ -171,16 +169,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (data && data.product_ids) {
-      console.log('StoreContext - Wishlist loaded from Supabase:', data.product_ids);
       dispatch({ type: 'SET_WISHLIST', payload: data.product_ids });
       hasLoadedDataRef.current = true; // Mark that we've loaded data
     } else if (error && error.code === 'PGRST116') {
       // No wishlist found in Supabase - start with empty wishlist
-      console.log('StoreContext - No wishlist found in Supabase, starting with empty wishlist');
       dispatch({ type: 'SET_WISHLIST', payload: [] });
       hasLoadedDataRef.current = true; // Mark that we've loaded (even if empty)
     } else if (error) {
-      console.error('Failed to fetch wishlist from Supabase', error);
       dispatch({ type: 'SET_WISHLIST', payload: [] });
       hasLoadedDataRef.current = true; // Mark that we've loaded (even if error)
     }
@@ -202,7 +197,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       fetchCartFromSupabase(authUser.id);
       fetchWishlistFromSupabase(authUser.id);
     } else if (!authUser) {
-      console.log('StoreContext - User logged out in AuthContext');
       // Set logout flag FIRST to prevent saving empty arrays
       isLoggingOutRef.current = true;
       hasLoadedDataRef.current = false; // Reset loaded flag
@@ -210,7 +204,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'LOGOUT' });
       // Keep the flag set for a moment to prevent any sync attempts
       setTimeout(() => {
-        console.log('StoreContext - Logout complete, resetting flag');
         isLoggingOutRef.current = false;
       }, 100);
     }
@@ -224,21 +217,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const syncCartToSupabase = async () => {
       // Skip syncing during logout
       if (isLoggingOutRef.current) {
-        console.log('StoreContext - Skipping cart sync during logout');
+;
         return;
       }
 
       // Skip syncing until we've loaded initial data from Supabase
       if (!hasLoadedDataRef.current) {
-        console.log('StoreContext - Skipping cart sync - waiting for initial data load');
         return;
       }
 
       if (state.user && state.user.id) {
-        console.log('StoreContext - Syncing cart to Supabase:', {
-          userId: state.user.id,
-          cartItemsCount: state.cart.length
-        });
+    
         const supabase = createSupabaseClient();
         const { data, error } = await supabase.from('cart_items').upsert({
           user_id: state.user.id,
@@ -257,7 +246,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             code: error.code
           });
         } else {
-          console.log('StoreContext - Cart synced to Supabase successfully:', data);
         }
       }
     };
@@ -270,22 +258,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const syncWishlistToSupabase = async () => {
       // Skip syncing during logout
       if (isLoggingOutRef.current) {
-        console.log('StoreContext - Skipping wishlist sync during logout');
         return;
       }
 
       // Skip syncing until we've loaded initial data from Supabase
       if (!hasLoadedDataRef.current) {
-        console.log('StoreContext - Skipping wishlist sync - waiting for initial data load');
         return;
       }
 
       if (state.user && state.user.id) {
-        console.log('StoreContext - Syncing wishlist to Supabase:', {
-          userId: state.user.id,
-          wishlist: state.wishlist,
-          wishlistLength: state.wishlist.length
-        });
+      
         const supabase = createSupabaseClient();
         const { data, error } = await supabase.from('wishlists').upsert({
           user_id: state.user.id,
@@ -304,7 +286,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             code: error.code
           });
         } else {
-          console.log('StoreContext - Wishlist synced to Supabase successfully:', data);
         }
       }
     };
@@ -330,16 +311,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleWishlist = (id: string) => {
-    console.log('StoreContext - toggleWishlist called:', {
-      productId: id,
-      currentWishlist: state.wishlist,
-      isCurrentlyInWishlist: state.wishlist.includes(id),
-      userId: state.user?.id
-    });
+
     dispatch({ type: 'TOGGLE_WISHLIST', payload: id });
     // Log after dispatch to see the result
     setTimeout(() => {
-      console.log('StoreContext - Wishlist after toggle dispatch:', state.wishlist);
+    
     }, 0);
   };
 

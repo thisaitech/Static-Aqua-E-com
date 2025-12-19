@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Simple admin check - just check if email matches
       if (email === 'nanthini@thisaitech.com') {
-        console.log('✅ Admin email detected')
+     
         setUserRole('admin')
         return 'admin'
       }
@@ -72,19 +72,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('email', email)
           .maybeSingle()
 
-        console.log('Admin check:', { adminData, adminError })
+       
 
         if (adminData) {
-          console.log('✅ Admin found in database')
+  
           setUserRole('admin')
           return 'admin'
         }
       } catch (e) {
-        console.log('Admin table check failed, using email comparison')
+      
       }
 
       // Default to user
-      console.log('👤 Regular user')
+     
       setUserRole('user')
       return 'user'
     } catch (error) {
@@ -112,10 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Redirect based on role
         if (role === 'admin' || email === 'nanthini@thisaitech.com') {
-          console.log('🎯 Admin login detected, redirecting to dashboard')
+ 
           router.push('/admin/dashboard')
         } else {
-          console.log('👤 User login detected, staying on home')
+  
           router.push('/')
         }
       }

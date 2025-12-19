@@ -37,7 +37,6 @@ export async function PATCH(
     const body = await request.json();
     const { full_name, phone, addresses, address } = body;
 
-    console.log('PATCH /api/users/[id] - Request body:', JSON.stringify(body, null, 2));
 
     let updateData: any = {};
 
@@ -46,12 +45,11 @@ export async function PATCH(
 
     // Handle addresses array (new approach)
     if (addresses !== undefined) {
-      console.log('Using addresses array approach');
+   
       updateData.addresses = addresses;
     }
     // Handle single address (for backward compatibility)
     else if (address !== undefined) {
-      console.log('Using single address approach (backward compatibility)');
       const { full_name: addrName, phone: addrPhone, address: addrStreet, city, state, district, pincode } = address;
 
       // Get existing addresses
@@ -66,7 +64,6 @@ export async function PATCH(
       }
 
       const existingAddresses: Address[] = existingUser?.addresses || [];
-      console.log('Existing addresses:', existingAddresses);
 
       // Create new address object
       const newAddress: Address = {
@@ -82,7 +79,6 @@ export async function PATCH(
         is_default: existingAddresses.length === 0 // First address is default
       };
 
-      console.log('New address object:', newAddress);
 
       // If this is the first address or marked as default, unset other defaults
       if (newAddress.is_default) {
@@ -91,10 +87,7 @@ export async function PATCH(
 
       // Add new address to array
       updateData.addresses = [...existingAddresses, newAddress];
-      console.log('Final addresses array:', updateData.addresses);
     }
-
-    console.log('Update data:', updateData);
 
     // Update user data
     const { data, error } = await supabase
@@ -110,7 +103,7 @@ export async function PATCH(
       return NextResponse.json({ error: error.message, details: error }, { status: 500 });
     }
 
-    console.log('User updated successfully:', data);
+
     return NextResponse.json({ user: data });
   } catch (error) {
     console.error('Error in user update API:', error);

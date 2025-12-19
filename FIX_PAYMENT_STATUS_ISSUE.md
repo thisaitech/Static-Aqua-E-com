@@ -44,7 +44,7 @@ if (updateError) {
 
 **After:**
 ```typescript
-console.log('Updating order:', orderId, 'with payment details');
+
 
 const { data: updateData, error: updateError } = await supabase
   .from('orders')
@@ -73,7 +73,7 @@ if (updateError) {
   );
 }
 
-console.log('✅ Order updated successfully:', updateData);
+
 ```
 
 ### 2. ✅ Better Error Handling in Checkout Page
@@ -96,18 +96,17 @@ if (!verifyResponse.ok) {
 
 **After:**
 ```typescript
-console.log('Verifying payment for order:', dbOrderId);
+
 const verifyResponse = await fetch('/api/razorpay/verify-payment', {...});
 
 const verifyData = await verifyResponse.json();
-console.log('Verify response:', verifyData);
 
 if (!verifyResponse.ok) {
   console.error('❌ Payment verification failed:', verifyData);
   throw new Error(verifyData.error || 'Payment verification failed');
 }
 
-console.log('✅ Payment verified successfully');
+
 ```
 
 ### 3. ✅ SQL Script to Fix Existing Orders

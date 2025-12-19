@@ -95,7 +95,7 @@ export default function AdminLayout({
           <div className="flex items-center justify-between px-6 py-5 border-b border-purple-800/50 bg-gradient-to-r from-purple-900/50 to-indigo-900/50">
             <div>
               <h2 className="text-xl font-bold bg-gradient-to-r from-purple-200 via-fuchsia-200 to-purple-300 bg-clip-text text-transparent">Admin Panel</h2>
-              <p className="text-xs text-purple-300/80 font-medium">Rainbow Aqua</p>
+              <p className="text-xs text-purple-300/80 font-medium">Rainbow Aquarium</p>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}

@@ -13,7 +13,7 @@ export default function TestCategoriesPage() {
   }, [])
 
   const fetchAndLogCategories = async () => {
-    console.log('=== TESTING CATEGORIES FETCH ===')
+
     
     try {
       setLoading(true)
@@ -24,7 +24,7 @@ export default function TestCategoriesPage() {
         .order('display_order')
 
       console.log('Raw response - error:', error)
-      console.log('Raw response - data:', data)
+   
       
       if (error) {
         console.error('Database error:', error)
@@ -32,15 +32,8 @@ export default function TestCategoriesPage() {
       }
 
       if (data) {
-        console.log('Number of categories:', data.length)
         data.forEach((cat, index) => {
-          console.log(`\n--- Category ${index + 1}: ${cat.name} ---`)
-          console.log('ID:', cat.id)
-          console.log('Types:', cat.types)
-          console.log('Types type:', typeof cat.types)
-          console.log('Is Array?:', Array.isArray(cat.types))
-          console.log('Length:', cat.types?.length)
-          console.log('JSON stringify:', JSON.stringify(cat.types))
+        
         })
         setCategories(data)
       }

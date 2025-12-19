@@ -38,8 +38,7 @@ export function ProductCard({ product, index = 0, variant = 'default' }: Product
       toggleAuthModal();
       return;
     }
-    console.log('ProductCard - Toggling wishlist for product:', product.id);
-    console.log('ProductCard - Current inWishlist state:', inWishlist);
+  
     toggleWishlist(product.id);
   };
 

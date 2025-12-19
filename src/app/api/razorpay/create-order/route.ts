@@ -49,11 +49,9 @@ export async function POST(request: Request) {
       notes: notes || {},
     };
 
-    console.log('Creating Razorpay order with options:', options);
 
     const order = await razorpay.orders.create(options);
 
-    console.log('Razorpay order created successfully:', order.id);
 
     return NextResponse.json({
       success: true,

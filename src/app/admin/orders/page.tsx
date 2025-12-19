@@ -87,12 +87,10 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      console.log('Admin page: Fetching orders from API...');
+    
       const response = await fetch('/api/orders');
 
-      console.log('Admin page: API response status:', response.status);
       const data = await response.json();
-      console.log('Admin page: API response data:', data);
 
       if (data.error) {
         console.error('Admin page: API returned error:', data.error);
@@ -101,11 +99,9 @@ export default function OrdersPage() {
       }
 
       if (data.orders) {
-        console.log(`Admin page: Received ${data.orders.length} orders`);
-        console.log('Admin page: isAdmin =', data.isAdmin);
+       
         setOrders(data.orders);
       } else {
-        console.warn('Admin page: No orders in response');
       }
     } catch (error) {
       console.error('Error fetching orders:', error);

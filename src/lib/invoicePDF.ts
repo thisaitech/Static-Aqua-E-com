@@ -34,7 +34,7 @@ export function generateInvoicePDF(invoice: InvoiceData) {
   const doc = new jsPDF();
 
   // Company details
-  const companyName = 'Rainbow Aqua';
+  const companyName = 'Rainbow Aquarium';
   const companyAddress = 'Your Company Address';
   const companyPhone = '+91 98765 43210';
   const companyEmail = 'info@rainbowaqua.com';

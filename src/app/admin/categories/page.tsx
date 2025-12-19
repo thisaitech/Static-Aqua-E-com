@@ -43,7 +43,6 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      console.log('Fetching categories from database...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
@@ -53,7 +52,7 @@ export default function CategoriesPage() {
         console.error('Database error:', error);
         throw error;
       }
-      console.log('Categories fetched:', data);
+    
       setCategories(data || [])
     } catch (error: any) {
       console.error('Error fetching categories:', error)
@@ -113,10 +112,10 @@ export default function CategoriesPage() {
     };
 
     try {
-      console.log('Saving category data:', formData);
+    
 
       if (editingCategory) {
-        console.log('Updating category:', editingCategory.id);
+      
         // When editing, DO NOT update slug - keep it unchanged to avoid breaking URLs
         const { data, error } = await supabase
           .from('categories')
@@ -136,9 +135,9 @@ export default function CategoriesPage() {
           console.error('Update error:', error);
           throw error;
         }
-        console.log('Category updated successfully:', data);
+     
       } else {
-        console.log('Inserting new category');
+    
         // Generate slug from name when creating new category
         const slugValue = generateSlug(formData.name);
         
@@ -160,7 +159,7 @@ export default function CategoriesPage() {
           console.error('Insert error:', error);
           throw error;
         }
-        console.log('Category inserted successfully:', data);
+     
       }
 
       setShowModal(false)
@@ -169,7 +168,6 @@ export default function CategoriesPage() {
       setNewCategoryName('')
       setEditingCategory(null)
       await fetchCategories()
-      console.log('Categories refreshed');
     } catch (error: any) {
       console.error('Error saving category:', error)
       alert(`Failed to save category: ${error.message || 'Unknown error'}`)

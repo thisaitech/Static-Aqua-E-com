@@ -70,14 +70,7 @@ export default function CategoryPageClient({ params }: { params: { slug: string 
           .eq('is_active', true)
           .single();
 
-        console.log('=== Category Filters Debug ===');
-        console.log('Original slug:', slug);
-        console.log('Clean slug:', cleanSlug);
-        console.log('Category data:', categoryData);
-        console.log('Types array:', categoryData?.types);
-        console.log('Category array:', categoryData?.category);
-        console.log('Types length:', categoryData?.types?.length);
-        console.log('Category length:', categoryData?.category?.length);
+ 
 
         if (categoryError && categoryError.code !== 'PGRST116') {
           console.error('Error fetching category:', categoryError);

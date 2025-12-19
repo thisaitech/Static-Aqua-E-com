@@ -6,8 +6,6 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('Missing Supabase credentials in environment variables');
-  console.log('URL:', supabaseUrl);
-  console.log('Key available:', !!supabaseKey);
   process.exit(1);
 }
 
@@ -20,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 
 async function createTables() {
   try {
-    console.log('Creating hero_banners table...');
+    
     
     const { error: bannerTableError } = await supabase.rpc('exec_sql', {
       sql: `
@@ -43,13 +41,8 @@ async function createTables() {
       `
     });
 
-    if (bannerTableError) {
-      console.error('Error creating hero_banners table:', bannerTableError);
-    } else {
-      console.log('✓ hero_banners table created successfully');
-    }
-
-    console.log('Creating banner_icons table...');
+ 
+ 
     
     const { error: iconTableError } = await supabase.rpc('exec_sql', {
       sql: `
@@ -71,10 +64,10 @@ async function createTables() {
     if (iconTableError) {
       console.error('Error creating banner_icons table:', iconTableError);
     } else {
-      console.log('✓ banner_icons table created successfully');
+     
     }
 
-    console.log('Adding RLS policies...');
+
     
     // Enable RLS
     const { error: rlsError } = await supabase.rpc('exec_sql', {
@@ -84,12 +77,7 @@ async function createTables() {
       `
     });
 
-    if (rlsError) {
-      console.error('Error enabling RLS:', rlsError);
-    } else {
-      console.log('✓ RLS enabled');
-    }
-
+ 
     // Create RLS policies
     const { error: policyError } = await supabase.rpc('exec_sql', {
       sql: `
@@ -114,13 +102,7 @@ async function createTables() {
       `
     });
 
-    if (policyError) {
-      console.error('Error creating RLS policies:', policyError);
-    } else {
-      console.log('✓ RLS policies created');
-    }
-
-    console.log('Creating indexes...');
+ 
     
     const { error: indexError } = await supabase.rpc('exec_sql', {
       sql: `
@@ -133,10 +115,10 @@ async function createTables() {
     if (indexError) {
       console.error('Error creating indexes:', indexError);
     } else {
-      console.log('✓ Indexes created');
+
     }
 
-    console.log('Inserting default data...');
+   
 
     // Insert default hero banners
     const { error: bannerInsertError } = await supabase
@@ -177,7 +159,7 @@ async function createTables() {
     if (bannerInsertError) {
       console.error('Error inserting banner data:', bannerInsertError);
     } else {
-      console.log('✓ Default banner data inserted');
+     
     }
 
     // Insert default banner icons
@@ -213,11 +195,10 @@ async function createTables() {
     if (iconInsertError) {
       console.error('Error inserting icon data:', iconInsertError);
     } else {
-      console.log('✓ Default icon data inserted');
+  
     }
 
-    console.log('\n🎉 Banner tables setup completed successfully!');
-    console.log('You can now manage hero banners from the admin panel at /admin/banners');
+
 
   } catch (error) {
     console.error('Error setting up banner tables:', error);

@@ -368,10 +368,10 @@ function generateInvoiceHTML(invoice: any, order: any): string {
     <!-- Header -->
     <div class="header">
       <div class="company-details">
-        <h1>Rainbow Aqua</h1>
-        <p>Water Purification Solutions</p>
+        <h1>Rainbow Aquarium</h1>
+        <p>Fish & Birds Paradise</p>
         <p>Email: info@rainbowaqua.com</p>
-        <p>Phone: +91 98765 43210</p>
+        <p>Phone: +91 88707 77420</p>
       </div>
       <div class="invoice-details">
         <h2>INVOICE</h2>

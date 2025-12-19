@@ -15,13 +15,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('Fetching orders for user:', user.id);
-    console.log('User email:', user.email);
+
 
     // Check if user is admin by email
     const isAdmin = user.email === 'nanthini@thisaitech.com';
 
-    console.log('Is admin (by email):', isAdmin);
+
 
     // Use service role client for admin to bypass RLS
     const queryClient = isAdmin
@@ -49,9 +48,9 @@ export async function GET(request: Request) {
       throw error;
     }
 
-    console.log(`Fetched ${orders?.length || 0} orders from Supabase`);
+
     if (orders && orders.length > 0) {
-      console.log('First order sample:', JSON.stringify(orders[0], null, 2));
+     
     }
 
     return NextResponse.json({ orders, isAdmin });
@@ -96,8 +95,7 @@ export async function POST(request: Request) {
     }
 
     // Debug: Log products being saved
-    console.log('Creating order with products:', JSON.stringify(products, null, 2));
-    console.log('Number of products:', products.length);
+
 
     // Create order
     const { data: order, error } = await supabase
@@ -129,9 +127,7 @@ export async function POST(request: Request) {
     }
 
     // Debug: Log what was actually saved
-    console.log('Order created successfully:', order.id);
-    console.log('Saved products:', JSON.stringify(order.products, null, 2));
-    console.log('Saved products count:', order.products?.length || 0);
+
 
     // Decrease stock quantity for each product using service role
     try {
@@ -145,7 +141,6 @@ export async function POST(request: Request) {
         const productId = product.id;
         const quantity = product.quantity || 1;
 
-        console.log(`Processing stock update for product ${productId}, ordered quantity: ${quantity}`);
 
         // Get current stock quantity using service role
         const { data: currentProduct, error: fetchError } = await serviceClient
@@ -162,7 +157,6 @@ export async function POST(request: Request) {
         if (currentProduct && currentProduct.quantity !== null) {
           const newQuantity = Math.max(0, currentProduct.quantity - quantity);
 
-          console.log(`Updating stock for product ${productId}: ${currentProduct.quantity} -> ${newQuantity}`);
 
           // Update product quantity using service role
           const { error: updateError } = await serviceClient
@@ -174,10 +168,8 @@ export async function POST(request: Request) {
             console.error(`Error updating stock for product ${productId}:`, updateError);
             console.error('Update error details:', JSON.stringify(updateError, null, 2));
           } else {
-            console.log(`✓ Stock successfully updated for product ${productId}: ${currentProduct.quantity} -> ${newQuantity}`);
           }
         } else {
-          console.log(`Product ${productId} has null quantity, skipping stock update`);
         }
       }
     } catch (stockError) {

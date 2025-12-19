@@ -90,7 +90,7 @@ Open browser console and check:
 
 // Or manually check:
 const user = JSON.parse(localStorage.getItem('rainbow-aqua-user') || '{}');
-console.log('User ID from localStorage:', user.id);
+
 ```
 
 Compare this ID with the `user_id` in the Supabase `wishlists` table. **They must match exactly!**
@@ -141,8 +141,7 @@ The issue might be with the auth token. Run in console:
 // Get current session
 const supabase = createSupabaseClient();
 supabase.auth.getSession().then(({ data: { session } }) => {
-  console.log('Current session:', session);
-  console.log('User ID from session:', session?.user?.id);
+
 });
 ```
 

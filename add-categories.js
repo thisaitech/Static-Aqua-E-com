@@ -83,9 +83,7 @@ async function addCategories() {
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all except a non-existent ID
 
-    if (deleteError) {
-      console.log('Note: No existing categories to delete or delete failed:', deleteError.message);
-    }
+
 
     // Insert new categories
     const { data, error } = await supabase
@@ -98,8 +96,7 @@ async function addCategories() {
       return;
     }
 
-    console.log('Categories added successfully:', data);
-    console.log(`Added ${data.length} categories to Supabase`);
+  
   } catch (err) {
     console.error('Script error:', err);
   }

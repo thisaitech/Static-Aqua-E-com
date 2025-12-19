@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Fish, Bird, Mail, Phone, MapPin, Instagram, Facebook, Youtube, Twitter, Smartphone, HelpCircle, FileText, Truck, CreditCard, RefreshCw, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Twitter, Smartphone, HelpCircle, FileText, Truck, CreditCard, RefreshCw, MessageCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -44,14 +45,17 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           {/* About */}
           <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="relative w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-                <Fish className="w-6 h-6 text-white" />
-                <Bird className="w-3 h-3 text-white absolute -bottom-0.5 -right-0.5 bg-accent-500 rounded-full p-0.5" />
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              <Image
+                src="/logo.png"
+                alt="Rainbow Aquarium"
+                width={50}
+                height={50}
+                className="object-contain"
+              />
               <div>
-                <h3 className="text-lg font-bold text-white">Rainbow Aqua</h3>
-                <p className="text-xs text-slate-400">Aquarium & Aviculture</p>
+                <h3 className="text-lg font-bold text-white">Rainbow Aquarium</h3>
+                <p className="text-xs text-slate-400">Fish & Birds Paradise</p>
               </div>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
@@ -167,13 +171,13 @@ export function Footer() {
               <Link href="#" className="hover:text-slate-300">Sitemap</Link>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-2 text-slate-500">
-              <span>© {currentYear} Rainbow Aqua. All rights reserved.</span>
+              <span>© {currentYear} Rainbow Aquarium. All rights reserved.</span>
               <span className="hidden sm:inline">•</span>
               <span>
                 Powered by{' '}
-                <a 
-                  href="https://thisaitech.com" 
-                  target="_blank" 
+                <a
+                  href="https://thisaitech.com"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-teal-400 hover:text-teal-300 transition-colors"
                 >

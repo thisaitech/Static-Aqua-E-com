@@ -41,7 +41,7 @@ export default function UsersPage() {
         throw error
       }
       
-      console.log('Fetched users:', data)
+
       setUsers(data || [])
     } catch (error) {
       console.error('Error fetching users:', error)

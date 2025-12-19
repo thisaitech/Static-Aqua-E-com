@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 
 async function insertDefaultData() {
   try {
-    console.log('Inserting default hero banners...');
+  
 
     // Insert default hero banners
     const { data: bannerData, error: bannerError } = await supabase
@@ -53,14 +53,7 @@ async function insertDefaultData() {
         }
       ], { onConflict: 'title' });
 
-    if (bannerError) {
-      console.error('Error inserting banner data:', bannerError);
-    } else {
-      console.log('✓ Default banner data inserted successfully');
-      console.log('Inserted banners:', bannerData);
-    }
-
-    console.log('Inserting default banner icons...');
+ 
 
     // Insert default banner icons
     const { data: iconData, error: iconError } = await supabase
@@ -89,16 +82,7 @@ async function insertDefaultData() {
         }
       ], { onConflict: 'display_name' });
 
-    if (iconError) {
-      console.error('Error inserting icon data:', iconError);
-    } else {
-      console.log('✓ Default icon data inserted successfully');
-      console.log('Inserted icons:', iconData);
-    }
-
-    console.log('\n🎉 Setup completed successfully!');
-    console.log('If you see errors, the tables may not exist yet.');
-    console.log('Please create them manually in Supabase dashboard or with SQL admin access.');
+    
 
   } catch (error) {
     console.error('Error during setup:', error);

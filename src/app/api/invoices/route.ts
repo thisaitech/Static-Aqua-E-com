@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
     }
 
-    console.log('Creating invoice for order:', orderId);
+
 
     // Fetch the order details
     const { data: order, error: orderError } = await supabase
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       .single();
 
     if (existingInvoice) {
-      console.log('Invoice already exists:', existingInvoice);
+   
       return NextResponse.json({
         invoice: existingInvoice,
         message: 'Invoice already exists for this order'
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     }
 
     // Generate invoice number using the database function
-    console.log('Generating invoice number...');
+
     const { data: invoiceNumberData, error: invoiceNumError } = await supabase
       .rpc('generate_invoice_number');
 
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
     }
 
     const invoiceNumber = invoiceNumberData;
-    console.log('Generated invoice number:', invoiceNumber);
+
 
     // Create invoice record
     const invoiceData = {
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       razorpay_payment_id: order.razorpay_payment_id,
     };
 
-    console.log('Creating invoice with data:', invoiceData);
+
 
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    console.log('Invoice created successfully:', invoice);
+
     return NextResponse.json({ invoice }, { status: 201 });
   } catch (error) {
     console.error('Error in invoice creation:', error);

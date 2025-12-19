@@ -131,8 +131,8 @@ export default function InvoicePage() {
           <div className="flex justify-between items-start mb-8 pb-8 border-b-2 border-slate-200">
             <div>
               <h1 className="text-3xl font-bold text-slate-800 mb-2">INVOICE</h1>
-              <p className="text-sm text-slate-500">Rainbow Aqua</p>
-              <p className="text-sm text-slate-500">Premium Aquarium & Birds Store</p>
+              <p className="text-sm text-slate-500">Rainbow Aquarium</p>
+              <p className="text-sm text-slate-500">Fish & Birds Paradise</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-slate-500">Invoice Number</p>

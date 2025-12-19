@@ -75,7 +75,6 @@ export default function CheckoutPage() {
             });
             setSelectedAddressId(defaultAddress.id);
             setIsNewAddress(false);
-            console.log('User addresses loaded from users.addresses column:', addresses.length);
           } else {
             // No saved addresses, mark as new
             setIsNewAddress(true);
@@ -163,14 +162,13 @@ export default function CheckoutPage() {
       }
 
       const { order: razorpayOrder } = await razorpayOrderResponse.json();
-      console.log('Razorpay order created:', razorpayOrder);
 
       // Initialize Razorpay checkout
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_RrVPw4temWVxGs',
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        name: 'Rainbow Aqua',
+        name: 'Rainbow Aquarium',
         description: 'Order Payment',
         order_id: razorpayOrder.id,
         // Remove image to avoid CORS issues in localhost
@@ -178,7 +176,6 @@ export default function CheckoutPage() {
         handler: async function (response: any) {
           try {
             // Verify payment
-            console.log('Verifying payment for order:', dbOrderId);
             const verifyResponse = await fetch('/api/razorpay/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -191,14 +188,12 @@ export default function CheckoutPage() {
             });
 
             const verifyData = await verifyResponse.json();
-            console.log('Verify response:', verifyData);
 
             if (!verifyResponse.ok) {
               console.error('❌ Payment verification failed:', verifyData);
               throw new Error(verifyData.error || 'Payment verification failed');
             }
 
-            console.log('✅ Payment verified successfully');
 
             // Generate invoice after successful payment (non-blocking)
             try {
@@ -210,7 +205,6 @@ export default function CheckoutPage() {
 
               if (invoiceResponse.ok) {
                 const { invoice } = await invoiceResponse.json();
-                console.log('Invoice generated:', invoice.invoice_number);
               } else {
                 const errorData = await invoiceResponse.json();
                 console.error('Invoice generation failed:', errorData);
@@ -333,14 +327,12 @@ export default function CheckoutPage() {
           if (addressResponse.ok) {
             const { address } = await addressResponse.json();
             addressId = address.id;
-            console.log('New address saved to users.addresses array:', addressId);
           }
         } catch (addressError) {
           console.error('Error saving address:', addressError);
           // Don't block order placement if address save fails
         }
       } else {
-        console.log('Using existing address:', addressId);
       }
 
       // Prepare order data
@@ -369,9 +361,6 @@ export default function CheckoutPage() {
       };
 
       // Debug: Log what we're sending
-      console.log('Cart items:', cart.length);
-      console.log('Order data products:', orderData.products.length);
-      console.log('Products being sent:', JSON.stringify(orderData.products, null, 2));
 
       // Create order in database first
       const response = await fetch('/api/orders', {
@@ -402,7 +391,6 @@ export default function CheckoutPage() {
 
           if (invoiceResponse.ok) {
             const { invoice } = await invoiceResponse.json();
-            console.log('Invoice generated:', invoice.invoice_number);
           }
         } catch (invoiceError) {
           console.error('Error generating invoice:', invoiceError);

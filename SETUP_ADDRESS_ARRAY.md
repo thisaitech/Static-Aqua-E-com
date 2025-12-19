@@ -188,7 +188,7 @@ ALTER TABLE public.users ADD COLUMN addresses JSONB DEFAULT '[]'::jsonb;
 ### Issue: API returns empty
 ```javascript
 // Check user is logged in
-console.log(useStore().user);
+
 
 // Check API response
 fetch('/api/user-addresses')
@@ -199,7 +199,7 @@ fetch('/api/user-addresses')
 ### Issue: Dropdown not appearing
 ```javascript
 // Check savedAddresses state
-console.log(savedAddresses);
+
 
 // Should see array with addresses after first order
 ```

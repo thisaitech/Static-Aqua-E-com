@@ -41,7 +41,6 @@ const fetchWishlistFromSupabase = async (userId: string) => {
 // 3. Don't sync to Supabase until we've loaded
 const syncWishlistToSupabase = async () => {
   if (!hasLoadedDataRef.current) {
-    console.log('Skipping sync - waiting for initial data load');
     return; // ← Don't sync yet!
   }
   // ... sync to Supabase ...
@@ -80,13 +79,11 @@ hasLoadedDataRef.current = true;
 ```typescript
 // In cart sync useEffect
 if (!hasLoadedDataRef.current) {
-  console.log('Skipping cart sync - waiting for initial data load');
   return;
 }
 
 // In wishlist sync useEffect
 if (!hasLoadedDataRef.current) {
-  console.log('Skipping wishlist sync - waiting for initial data load');
   return;
 }
 ```

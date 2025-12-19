@@ -24,7 +24,6 @@ export default function WishlistPage() {
       }
 
       setLoading(true);
-      console.log('Fetching products for wishlist:', wishlist);
 
       try {
         const products = await Promise.all(
@@ -32,7 +31,6 @@ export default function WishlistPage() {
         );
 
         const validProducts = products.filter((p): p is Product => p !== null);
-        console.log('Fetched wishlist products:', validProducts);
         setWishlistProducts(validProducts);
       } catch (error) {
         console.error('Error fetching wishlist products:', error);
@@ -49,10 +47,7 @@ export default function WishlistPage() {
 
   // Debug logging
   useEffect(() => {
-    console.log('Wishlist Page - User:', user);
-    console.log('Wishlist Page - Wishlist array:', wishlist);
-    console.log('Wishlist Page - Wishlist products:', wishlistProducts);
-    console.log('Wishlist Page - LocalStorage wishlist:', localStorage.getItem('rainbow-aqua-wishlist'));
+  
   }, [wishlist, user, wishlistProducts]);
 
   // Wait for initial mount and user load

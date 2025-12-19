@@ -8,23 +8,18 @@ When placing an order with multiple products in cart, the `orders` table isn't s
 ### 1. Frontend Logging (checkout/page.tsx)
 Added at line 290-293 to log what's being sent:
 ```typescript
-console.log('Cart items:', cart.length);
-console.log('Order data products:', orderData.products.length);
-console.log('Products being sent:', JSON.stringify(orderData.products, null, 2));
+
 ```
 
 ### 2. Backend Logging (api/orders/route.ts)
 Added at line 79-80 to log what's received:
 ```typescript
-console.log('Creating order with products:', JSON.stringify(products, null, 2));
-console.log('Number of products:', products.length);
+
 ```
 
 Added at line 112-114 to log what was saved:
 ```typescript
-console.log('Order created successfully:', order.id);
-console.log('Saved products:', JSON.stringify(order.products, null, 2));
-console.log('Saved products count:', order.products?.length || 0);
+
 ```
 
 ---

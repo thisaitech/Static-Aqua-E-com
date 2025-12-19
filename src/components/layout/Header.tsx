@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
   Search,
   Heart,
@@ -13,8 +14,6 @@ import {
   X,
   Sun,
   Moon,
-  Fish,
-  Bird,
   ChevronDown,
   MapPin,
   Truck,
@@ -225,17 +224,20 @@ export function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-              <div className="relative w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-md">
-                <Fish className="w-6 h-6 text-white" />
-                <Bird className="w-3 h-3 text-white absolute -bottom-0.5 -right-0.5 bg-accent-500 rounded-full p-0.5" />
-              </div>
+            <Link href="/" className="flex items-center gap-3 flex-shrink-0">
+              <Image
+                src="/logo.png"
+                alt="Rainbow Aquarium"
+                width={50}
+                height={50}
+                className="object-contain"
+              />
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">
-                  Rainbow Aqua
+                  Rainbow Aquarium
                 </h1>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 -mt-0.5 italic">
-                  Explore <span className="text-primary-500">Plus</span>
+                  Fish & Birds Paradise
                 </p>
               </div>
             </Link>
@@ -657,7 +659,7 @@ export function Header() {
               {/* Bottom Links */}
               <div className="border-t border-slate-200 p-4">
                 <div className="flex items-center justify-between text-sm text-slate-500">
-                  <span>© Rainbow Aqua</span>
+                  <span>© Rainbow Aquarium</span>
                   <div className="flex items-center gap-2">
                     <span>தமிழ்</span>
                     <span>•</span>
