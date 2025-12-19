@@ -187,13 +187,8 @@ export function ProductCard({ product, index = 0, variant = 'default' }: Product
       {/* Product Info */}
       <Link href={`/product/${product.id}`}>
         <div className="p-3">
-          {/* Brand/Category Tag */}
-          <p className="text-[10px] text-primary-600 dark:text-primary-400 font-medium uppercase tracking-wider mb-1">
-            {product.category.replace(/-/g, ' ')}
-          </p>
-          
           {/* Name */}
-          <h3 className="font-medium text-slate-800 dark:text-white line-clamp-2 text-sm leading-snug group-hover:text-primary-600 transition-colors min-h-[2.5rem]">
+          <h3 className="font-medium text-slate-800 dark:text-white line-clamp-2 text-sm leading-snug group-hover:text-primary-600 transition-colors min-h-[2.5rem] mt-1">
             {product.name}
           </h3>
 
